@@ -463,8 +463,12 @@ final class WorkspaceStore: ObservableObject {
                 if let skill {
                     let catalog = try await connection.request("skill/list", ["sessionId": .string(id)])
                     let candidates = catalog["skills"].array.map(SkillEntry.init)
+                    // CLI-catalog skills carry a display invocationName ("Synthetic review")
+                    // while the session catalog reports a selector slug ("synthetic-review").
+                    let slug = skill.invocationName.lowercased().replacingOccurrences(of: " ", with: "-")
                     let match = candidates.first { $0.selector == skill.selector && skill.selector != nil }
                         ?? candidates.first { $0.selector == skill.invocationName }
+                        ?? candidates.first { $0.selector == slug }
                     guard let selector = match?.selector else { throw ConnectionFailure.protocolError("This skill is not available in the session. Refresh the skill library and choose again.") }
                     input = [.object(["type": .string("skill"), "selector": .string(selector), "arguments": .string(text)])]
                 } else { input = [.object(["type": .string("text"), "text": .string(text)])] }

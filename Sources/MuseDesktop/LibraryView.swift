@@ -55,12 +55,14 @@ struct CommandPaletteView: View {
                                     if index == selected { Image(systemName: "return").font(.system(size: 11)).foregroundStyle(MuseTheme.secondary) }
                                 }.padding(10).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
                                     .background(index == selected ? MuseTheme.raised : .clear, in: RoundedRectangle(cornerRadius: 8))
-                            }.buttonStyle(.plain).id(index)
+                            }.buttonStyle(.plain).id(entry.id)
                         }
                         if entries.isEmpty { Text("No matching skills or commands.").font(.system(size: 13)).foregroundStyle(MuseTheme.secondary).padding(24) }
                     }.padding(8)
                 }
-                .onChange(of: selected) { _, value in proxy.scrollTo(value) }
+                .onChange(of: selected) { _, value in
+                    if entries.indices.contains(value) { proxy.scrollTo(entries[value].id) }
+                }
             }
             Hairline()
             HStack {
