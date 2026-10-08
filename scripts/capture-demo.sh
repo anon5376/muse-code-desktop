@@ -82,85 +82,88 @@ type() { "$drive_bin" type "$app_pid" "$1"; sleep 0.4; }
 click() { "$drive_bin" click "$app_pid" "$1" "$2"; sleep 0.6; }
 geom() { read -r WIN_ID WIN_X WIN_Y WIN_W WIN_H <<< "$( { "$drive_bin" window "$app_pid" || true; } | tr ',' ' ')"; }
 
-CX=$((WIN_X + 249 + (WIN_W - 249) / 2))            # composer horizontal center
-CY=$((WIN_Y + WIN_H - 115))                       # composer text area (bottom strip is a toolbar, not focusable)
-
 echo "--- beat: workspace at rest"
 shot 01-workspace
 
-echo "--- beat: markdown transcript"
-click "$CX" "$CY"
-type "Draft a short native markdown reply for the README demo."
-key 36 command
-sleep 2
-shot 02-markdown
-
-echo "--- beat: 40-line approval card"
-click "$CX" "$CY"
-type "please present the approval fixture"
-key 36 command
-sleep 2
-shot 03-approval
-
-echo "--- beat: command palette + skill"
+echo "--- beat: command palette -> synthetic skill -> markdown reply"
+# Selecting the skill sets pendingSkill and focuses the composer (the only
+# keyboard-reachable way to focus it); the chip then scopes the next send.
 key 40 command
 sleep 1
-shot 04-palette
+shot 02-palette
 type "synthetic"
 sleep 0.8
-shot 05-palette-filtered
+shot 03-palette-filtered
 key 36
 sleep 0.8
-shot 06-skill-chip
+shot 04-skill-chip
+type "Draft a short native markdown reply for the README demo."
+sleep 0.5
+shot 05-composer-draft
+key 36 command
+sleep 3
+shot 06-markdown
+
+echo "--- beat: 40-line approval card"
+# Composer keeps focus after a send; the fixture prompt swaps the transcript.
+type "please present the approval fixture"
+key 36 command
+sleep 3
+shot 07-approval
 
 echo "--- beat: inspector files"
 key 34 command option
 sleep 1
-shot 07-inspector
+shot 08-inspector
 # First file row in the inspector list.
 click $((WIN_X + WIN_W - 150)) $((WIN_Y + 130))
 sleep 0.6
-shot 08-file-preview
+shot 09-file-preview
 
 echo "--- beat: model picker"
 click $((WIN_X + WIN_W - 130)) $((WIN_Y + WIN_H - 43))
 sleep 1
-shot 09-model-picker
+shot 10-model-picker
 key 53
 sleep 0.5
 
-echo "--- beat: resize to compact 980x640 (palette open, then dismissed)"
+echo "--- beat: resize to compact 980x640, palette open then dismissed"
 "$drive_bin" drag "$app_pid" $((WIN_X + WIN_W - 3)) $((WIN_Y + WIN_H - 3)) $((WIN_X + 980 - 3)) $((WIN_Y + 640 - 3)) 24
 sleep 1
 geom
 echo "  resized to ${WIN_W}x${WIN_H}"
-shot 10-compact
+shot 11-compact
 key 40 command
 sleep 1
-shot 11-compact-palette
+shot 12-compact-palette
 key 53
-sleep 0.5
+sleep 0.8
 
 echo "--- beat: deny the synthetic request (app must stay responsive)"
 DENY_X=$((WIN_X + 249 + 36 + 85 + 8 + 125 + 8 + 28))
 DENY_Y=$((WIN_Y + WIN_H - 140))
 click "$DENY_X" "$DENY_Y"
 sleep 1
-shot 12-resolved
+shot 13-resolved
 if ! kill -0 "$app_pid" 2>/dev/null; then echo "App terminated unexpectedly during the regression" >&2; exit 1; fi
 
 echo "--- beat: question card"
-click $((WIN_X + 249 + (WIN_W - 249) / 2)) $((WIN_Y + WIN_H - 115))
+key 40 command
+sleep 1
+type "synthetic"
+sleep 0.8
+key 36
+sleep 0.8
 type "please present the question fixture"
 key 36 command
 sleep 2
-shot 13-question
-# "macOS" option then Send answers.
+shot 14-question
+# First option row, then the card's Send/answer control.
 click $((WIN_X + 300)) $((WIN_Y + WIN_H - 210))
 sleep 0.5
 click $((WIN_X + 300)) $((WIN_Y + WIN_H - 150))
 sleep 1
-shot 14-answered
+shot 15-answered
 
 kill "$app_pid" 2>/dev/null || true
 sleep 1
