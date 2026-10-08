@@ -1,0 +1,54 @@
+name: Publish release
+
+# Runs only when the v0.1.0 tag is pushed to this repository. The job builds,
+# tests, packages and verifies the DMG, creates a DRAFT release, uploads the
+# verified assets, then publishes it as a prerelease. It fails without
+# publishing if a v0.1.0 release already exists, the tag does not resolve to
+# the checked-out commit, release notes are missing, or any required asset is
+# incomplete. It never overwrites an existing release.
+
+on:
+  push:
+    tags:
+      - v0.1.0
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-v0.1.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'anon5376/muse-code-desktop' && github.ref == 'refs/tags/v0.1.0'
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert Apple Silicon runner
+        run: test "$(uname -m)" = "arm64"
+
+      - name: Install Muse CLI (official installer)
+        run: |
+          if curl -fsSL https://dev.meta.ai/install.sh | sh; then
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          else
+            echo "::warning::Muse CLI install failed; Muse-dependent tests will be skipped"
+          fi
+
+      - name: Build release app
+        run: bash scripts/build-app.sh release
+
+      - name: Run tests
+        run: bash scripts/test-ci.sh
+
+      - name: Package and verify DMG
+        run: bash scripts/package-dmg.sh
+
+      - name: Publish draft, upload assets, publish prerelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: /usr/bin/python3 scripts/publish-release.py
