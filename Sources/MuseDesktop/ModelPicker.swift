@@ -5,20 +5,7 @@ struct ModelPickerControl: View {
     @State private var presented = false
 
     var body: some View {
-        Button { presented.toggle() } label: {
-            HStack(spacing: 7) {
-                Image(systemName: "cpu").foregroundStyle(MuseTheme.accent)
-                Text(composerModelLabel).lineLimit(1).truncationMode(.tail)
-                if let effort = store.reasoningEffort { Text("· " + effort.capitalized).foregroundStyle(MuseTheme.secondary) }
-                if let notice = store.chosenModel?.dataUseNotice {
-                    Text("Data use").font(.system(size: 11, weight: .medium)).foregroundStyle(MuseTheme.attention).help(notice)
-                }
-                Image(systemName: "chevron.up.chevron.down").font(.system(size: 11, weight: .semibold))
-            }
-            .font(.system(size: 11, weight: .medium)).foregroundStyle(MuseTheme.text)
-            .padding(.horizontal, 10).frame(height: 30)
-            .background(MuseTheme.canvas, in: RoundedRectangle(cornerRadius: 7))
-        }
+        Button { presented.toggle() } label: { controlLabel }
         .buttonStyle(.plain).frame(maxWidth: 360, alignment: .trailing)
         .help(store.modelLabel + (store.chosenModel?.dataUseNotice.map { "\n" + $0 } ?? "") + "\nChoose model and reasoning level")
         .accessibilityLabel("Choose model").accessibilityValue(store.modelLabel + (store.chosenModel?.dataUseNotice == nil ? "" : ", data-use notice"))
@@ -30,6 +17,23 @@ struct ModelPickerControl: View {
     private var composerModelLabel: String {
         guard !store.echoMode, let model = store.chosenModel else { return store.modelLabel }
         return model.displayName + (model.profileID.map { " · " + $0 } ?? "")
+    }
+
+    // Kept as a separate view expression: some Swift 6.x compilers time out
+    // type-checking the full button body in release mode.
+    private var controlLabel: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "cpu").foregroundStyle(MuseTheme.accent)
+            Text(composerModelLabel).lineLimit(1).truncationMode(.tail)
+            if let effort = store.reasoningEffort { Text("· " + effort.capitalized).foregroundStyle(MuseTheme.secondary) }
+            if let notice = store.chosenModel?.dataUseNotice {
+                Text("Data use").font(.system(size: 11, weight: .medium)).foregroundStyle(MuseTheme.attention).help(notice)
+            }
+            Image(systemName: "chevron.up.chevron.down").font(.system(size: 11, weight: .semibold))
+        }
+        .font(.system(size: 11, weight: .medium)).foregroundStyle(MuseTheme.text)
+        .padding(.horizontal, 10).frame(height: 30)
+        .background(MuseTheme.canvas, in: RoundedRectangle(cornerRadius: 7))
     }
 }
 
