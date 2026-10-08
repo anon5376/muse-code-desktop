@@ -26,12 +26,14 @@ jobs:
         run: bash scripts/capture-demo.sh
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: demo-media-${{ github.sha }}
           path: build/demo/media/
           retention-days: 30
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: demo-frames-${{ github.sha }}
           path: build/demo/shots/

@@ -175,7 +175,8 @@ for shot_file in "$shots"/*.png; do
     base="$(basename "$shot_file")"
     sips -Z 1440 "$shot_file" --out "$media_dir/$base" >/dev/null
 done
-"$demo_root/stitch-frames" "$shots" "$media_dir/demo.gif" "$media_dir/demo.mp4" 2>/dev/null || \
-    echo "Video stitching unavailable; stills still captured"
+"$demo_root/stitch-frames" "$shots" "$media_dir/demo.gif" "$media_dir/demo.mp4" || {
+    echo "FAIL: demo GIF/MP4 stitching did not complete" >&2; exit 1
+}
 echo "Media written to $media_dir"
 ls -la "$media_dir"

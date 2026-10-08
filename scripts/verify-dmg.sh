@@ -57,24 +57,35 @@ WIN_ID="${window%%,*}"
 echo "PASS: app copied from DMG presents a window ($window)"
 kill "$app_pid" 2>/dev/null || true; wait "$app_pid" 2>/dev/null || true
 
-echo "--- launch without Muse CLI (missing-prerequisite check)"
-if command -v muse >/dev/null 2>&1; then
-    echo "SKIP: a muse executable exists on this machine"
+# A window alone does not prove the host connected — the app opens its window
+# before the handshake completes. Exercise the same MuseCore connection stack
+# against the same ReviewHost so a broken host path fails verification.
+echo "--- MuseCore handshake against the same ReviewHost"
+bash "$project_root/scripts/swift-local.sh" build --product MuseDiagnostics
+diag_bin="$project_root/.build/debug/MuseDiagnostics"
+if "$diag_bin" "$host_bin" | tee "$verify_dir/diagnostics.txt"; then
+    echo "PASS: connection stack completes initialize -> turn -> shutdown"
 else
-    "$install_dir/Muse Code.app/Contents/MacOS/MuseDesktop" --workspace "$fixture_ws" &
-    nomuse_pid=$!; pids+=("$nomuse_pid")
-    sleep 6
-    if ! kill -0 "$nomuse_pid" 2>/dev/null; then
-        echo "FAIL: app exited instead of showing the missing-CLI error" >&2; exit 1
-    fi
-    window="$("$drive_bin" window "$nomuse_pid" 2>/dev/null || true)"
-    if [[ -n "$window" ]]; then
-        WIN_ID="${window%%,*}"
-        /usr/sbin/screencapture -x -o -l "$WIN_ID" "$verify_dir/missing-muse.png" 2>/dev/null || \
-            "$drive_bin" shot "$nomuse_pid" "$verify_dir/missing-muse.png"
-    fi
-    echo "PASS: app stays up and reports the missing CLI ($window)"
-    kill "$nomuse_pid" 2>/dev/null || true
+    echo "FAIL: host handshake did not complete" >&2; exit 1
 fi
+
+echo "--- launch with an unavailable Muse executable (missing-prerequisite check)"
+# Pointing at a nonexistent binary exercises the error path even on machines
+# where a real muse is installed (preferredPath wins over every fallback).
+"$install_dir/Muse Code.app/Contents/MacOS/MuseDesktop" \
+    --muse-executable "$verify_dir/no-such-muse" --workspace "$fixture_ws" &
+nomuse_pid=$!; pids+=("$nomuse_pid")
+sleep 6
+if ! kill -0 "$nomuse_pid" 2>/dev/null; then
+    echo "FAIL: app exited instead of showing the missing-CLI error" >&2; exit 1
+fi
+window="$("$drive_bin" window "$nomuse_pid" 2>/dev/null || true)"
+if [[ -n "$window" ]]; then
+    WIN_ID="${window%%,*}"
+    /usr/sbin/screencapture -x -o -l "$WIN_ID" "$verify_dir/missing-muse.png" 2>/dev/null || \
+        "$drive_bin" shot "$nomuse_pid" "$verify_dir/missing-muse.png"
+fi
+echo "PASS: app stays up and reports the missing CLI ($window)"
+kill "$nomuse_pid" 2>/dev/null || true
 
 echo "DMG verification passed. Evidence in $verify_dir"

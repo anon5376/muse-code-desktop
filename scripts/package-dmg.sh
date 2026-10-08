@@ -28,7 +28,8 @@ bash "$project_root/scripts/build-app.sh" release
 # 2. Version and build metadata stay consistent everywhere.
 plist="$app_path/Contents/Info.plist"
 version="${1:-$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$plist")}"
-build_meta="$(git -C "$project_root" rev-parse --short HEAD 2>/dev/null || echo local)"
+# CFBundleVersion must be numeric; the commit count is monotonic per commit.
+build_meta="$(git -C "$project_root" rev-list --count HEAD 2>/dev/null || echo 0)"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $build_meta" "$plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $version" "$plist"
 # Re-sign after the plist edit so the seal matches the shipped bundle.
