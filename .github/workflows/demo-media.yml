@@ -6,8 +6,6 @@ name: demo-media
 # docs/media/ for the README.
 on:
   workflow_dispatch:
-  pull_request:
-    paths: [".github/workflows/demo-media.yml", "scripts/capture-demo.sh", "scripts/demo-drive.swift", "scripts/stitch-frames.swift", "Sources/**", "Tests/**"]
 
 permissions:
   contents: read
