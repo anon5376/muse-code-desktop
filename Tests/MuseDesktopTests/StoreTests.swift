@@ -32,121 +32,127 @@ enum StoreTests {
             if catalogStore.chosenModel?.id == contributor.id, catalogStore.modelLabel.contains("Contributor") {
                 print("PASS configured default resolves to its actual catalog model")
             } else { failures += 1; print("FAIL configured default hides its actual model") }
-            try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
-            store.workspace = root
-            await store.start()
-            guard store.engine == .ready else { throw Failure(description: store.errorMessage ?? "Host did not connect") }
-            store.draft = "Keep the unsent new-session draft"
-            let sessionCount = store.sessions.count
-            store.newSession()
-            try await waitUntil { !store.isBusy }
-            if store.selectedID == nil, store.sessions.count == sessionCount, store.draft == "Keep the unsent new-session draft" {
-                print("PASS new session keeps its draft without creating a host session")
-            } else { failures += 1; print("FAIL new session created an empty host session or lost its draft") }
-            store.draft = "store-lifecycle-check"
-            store.send()
-            try await waitUntil { !store.isBusy && !store.isRunning && store.selectedID != nil }
-            guard store.current?.transcript.items.contains(where: { $0.text == "echo: store-lifecycle-check" }) == true,
-                  let id = store.selectedID, let state = store.current else { throw Failure(description: "Real echo turn was not received") }
-            store.newSession()
-            if store.selectedID == nil, store.draft.isEmpty { print("PASS sent first prompt is consumed from the new-session draft") }
-            else { failures += 1; print("FAIL an already-sent prompt reappeared in a new draft") }
-            store.draft = "Keep this unsent new-session draft"
-            store.selectSession(id)
-            try await waitUntil { !store.isBusy }
-            store.newSession()
-            if store.draft == "Keep this unsent new-session draft" { print("PASS unsent new-session draft survives session navigation") }
-            else { failures += 1; print("FAIL navigation discarded an unsent new-session draft") }
-            store.draft = ""; store.selectSession(id)
-            try await waitUntil { !store.isBusy }
-
-            await store.refreshSkills()
-            let count = state.transcript.items.count
-            store.pendingSkill = SkillEntry(raw: .object(["selector": .string("not-an-installed-skill-731b"), "displayName": .string("Unavailable skill")]))
-            store.draft = "keep these arguments"
-            store.send()
-            try await waitUntil { !store.isBusy }
-            if store.errorMessage != nil, store.draft == "keep these arguments", store.pendingSkill != nil, state.transcript.items.count == count {
-                print("PASS unavailable skill preserves the draft and never submits a literal slash prompt")
-            } else { failures += 1; print("FAIL unavailable skill was submitted or discarded its draft") }
-            store.pendingSkill = nil; store.errorMessage = nil
-
-            store.newSession()
-            store.draft = "Create a second session for the selection check"
-            store.send()
-            try await waitUntil { !store.isBusy }
-            // The UI can choose a reasoning override in a different session.
-            // Echo has no variants: the old override must not survive selection.
-            store.reasoningEffort = "high"
-            store.selectSession(id)
-            try await waitUntil { !store.isBusy }
-            store.draft = "reasoning-reset-check"
-            store.send()
-            try await waitUntil { !store.isBusy && !store.isRunning }
-            if store.reasoningEffort == nil, state.transcript.items.contains(where: { $0.text == "echo: reasoning-reset-check" }) {
-                print("PASS switching sessions clears unsupported reasoning and still sends")
-            } else { failures += 1; print("FAIL another session's reasoning override blocked the current session") }
-
-            // A cached selection can outlive its host load. It must not admit
-            // commands, and selecting that same row must actually try resume.
-            state.loaded = false
-            store.draft = "must wait for resume"
-            if store.canSend { failures += 1; print("FAIL unloaded selection admitted a prompt") }
-            else { print("PASS unloaded selection blocks prompt admission") }
-            store.selectSession(id)
-            try await waitUntil { !store.isBusy }
-            if state.loaded && !state.unavailable {
-                print("PASS selected unloaded session resumes through the actual host")
-            } else if !state.loaded && state.unavailable && store.errorMessage != nil {
-                print("PASS selected unloaded session reports unavailable host history")
-            } else { failures += 1; print("FAIL selecting the unloaded current row did not attempt recovery") }
-
-            // A memory-only echo session cannot survive a new host. Reconnect
-            // must report that fact, not leave a sendable stale transcript.
-            await store.connect()
-            if store.selectedID == id, store.current?.unavailable == true, !store.canSend, store.errorMessage != nil {
-                print("PASS reconnect reports the lost ephemeral session and blocks stale submission")
-            } else { failures += 1; print("FAIL reconnect left an unrecovered selected session usable") }
-
-            // A catalog profile can disappear between browsing and starting.
-            // The real host must reject it; the app must not send with the
-            // session/start default after that explicit selection failed.
-            let missingProfile = ModelEntry(raw: .object(["modelId": .string("muse-spark-1.3"), "providerId": .string("meta"), "profileId": .string("missing-profile-731b")]))
-            store.models = [missingProfile]; store.selectedModelKey = missingProfile.id
-            store.newSession()
-            store.draft = "must not use the wrong model"
-            store.send()
-            try await waitUntil { !store.isBusy }
-            store.draft = "must not use the wrong model"
-            if store.selectedID != id, store.errorMessage != nil, !store.canSend {
-                print("PASS rejected profile blocks submission with the session-start default")
-            } else { failures += 1; print("FAIL rejected profile left the wrong default model sendable") }
-
-            let rejectedID = store.selectedID
-            store.forkSession()
-            if !store.isBusy, store.selectedID == rejectedID {
-                print("PASS rejected profile blocks fork admission")
-            } else { failures += 1; print("FAIL rejected profile admitted a fork with the wrong model") }
-            try await waitUntil { !store.isBusy }
-            if let rejectedID, store.selectedID != rejectedID {
-                store.selectSession(rejectedID)
+            // The lifecycle checks below exercise a real `muse serve --provider echo` host.
+            // Without an installed CLI they are skipped, not failed.
+            if MuseExecutable.locate() != nil {
+                try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+                store.workspace = root
+                await store.start()
+                guard store.engine == .ready else { throw Failure(description: store.errorMessage ?? "Host did not connect") }
+                store.draft = "Keep the unsent new-session draft"
+                let sessionCount = store.sessions.count
+                store.newSession()
                 try await waitUntil { !store.isBusy }
-            }
-            for method in ["goal/set", "goal/resume"] {
-                store.actionError = nil; store.actionNotice = nil
-                let parameters: [String: JSONValue] = method == "goal/set" ? ["objective": .string("Do not run with an unconfirmed model")] : [:]
-                store.sessionAction(method, label: "Goal", parameters: parameters)
-                try await waitUntil { store.pendingActions.isEmpty }
-                if store.actionError?.localizedCaseInsensitiveContains("model") == true, store.actionNotice == nil {
-                    print("PASS rejected profile blocks \(method)")
-                } else { failures += 1; print("FAIL rejected profile admitted \(method)") }
-                // Before the fix, the isolated echo host may admit a goal.
-                // Pause that goal so this regression never leaves it running.
-                if store.current?.goal != .null {
-                    store.sessionAction("goal/pause", label: "Pause goal")
-                    try await waitUntil { store.pendingActions.isEmpty }
+                if store.selectedID == nil, store.sessions.count == sessionCount, store.draft == "Keep the unsent new-session draft" {
+                    print("PASS new session keeps its draft without creating a host session")
+                } else { failures += 1; print("FAIL new session created an empty host session or lost its draft") }
+                store.draft = "store-lifecycle-check"
+                store.send()
+                try await waitUntil { !store.isBusy && !store.isRunning && store.selectedID != nil }
+                guard store.current?.transcript.items.contains(where: { $0.text == "echo: store-lifecycle-check" }) == true,
+                      let id = store.selectedID, let state = store.current else { throw Failure(description: "Real echo turn was not received") }
+                store.newSession()
+                if store.selectedID == nil, store.draft.isEmpty { print("PASS sent first prompt is consumed from the new-session draft") }
+                else { failures += 1; print("FAIL an already-sent prompt reappeared in a new draft") }
+                store.draft = "Keep this unsent new-session draft"
+                store.selectSession(id)
+                try await waitUntil { !store.isBusy }
+                store.newSession()
+                if store.draft == "Keep this unsent new-session draft" { print("PASS unsent new-session draft survives session navigation") }
+                else { failures += 1; print("FAIL navigation discarded an unsent new-session draft") }
+                store.draft = ""; store.selectSession(id)
+                try await waitUntil { !store.isBusy }
+
+                await store.refreshSkills()
+                let count = state.transcript.items.count
+                store.pendingSkill = SkillEntry(raw: .object(["selector": .string("not-an-installed-skill-731b"), "displayName": .string("Unavailable skill")]))
+                store.draft = "keep these arguments"
+                store.send()
+                try await waitUntil { !store.isBusy }
+                if store.errorMessage != nil, store.draft == "keep these arguments", store.pendingSkill != nil, state.transcript.items.count == count {
+                    print("PASS unavailable skill preserves the draft and never submits a literal slash prompt")
+                } else { failures += 1; print("FAIL unavailable skill was submitted or discarded its draft") }
+                store.pendingSkill = nil; store.errorMessage = nil
+
+                store.newSession()
+                store.draft = "Create a second session for the selection check"
+                store.send()
+                try await waitUntil { !store.isBusy }
+                // The UI can choose a reasoning override in a different session.
+                // Echo has no variants: the old override must not survive selection.
+                store.reasoningEffort = "high"
+                store.selectSession(id)
+                try await waitUntil { !store.isBusy }
+                store.draft = "reasoning-reset-check"
+                store.send()
+                try await waitUntil { !store.isBusy && !store.isRunning }
+                if store.reasoningEffort == nil, state.transcript.items.contains(where: { $0.text == "echo: reasoning-reset-check" }) {
+                    print("PASS switching sessions clears unsupported reasoning and still sends")
+                } else { failures += 1; print("FAIL another session's reasoning override blocked the current session") }
+
+                // A cached selection can outlive its host load. It must not admit
+                // commands, and selecting that same row must actually try resume.
+                state.loaded = false
+                store.draft = "must wait for resume"
+                if store.canSend { failures += 1; print("FAIL unloaded selection admitted a prompt") }
+                else { print("PASS unloaded selection blocks prompt admission") }
+                store.selectSession(id)
+                try await waitUntil { !store.isBusy }
+                if state.loaded && !state.unavailable {
+                    print("PASS selected unloaded session resumes through the actual host")
+                } else if !state.loaded && state.unavailable && store.errorMessage != nil {
+                    print("PASS selected unloaded session reports unavailable host history")
+                } else { failures += 1; print("FAIL selecting the unloaded current row did not attempt recovery") }
+
+                // A memory-only echo session cannot survive a new host. Reconnect
+                // must report that fact, not leave a sendable stale transcript.
+                await store.connect()
+                if store.selectedID == id, store.current?.unavailable == true, !store.canSend, store.errorMessage != nil {
+                    print("PASS reconnect reports the lost ephemeral session and blocks stale submission")
+                } else { failures += 1; print("FAIL reconnect left an unrecovered selected session usable") }
+
+                // A catalog profile can disappear between browsing and starting.
+                // The real host must reject it; the app must not send with the
+                // session/start default after that explicit selection failed.
+                let missingProfile = ModelEntry(raw: .object(["modelId": .string("muse-spark-1.3"), "providerId": .string("meta"), "profileId": .string("missing-profile-731b")]))
+                store.models = [missingProfile]; store.selectedModelKey = missingProfile.id
+                store.newSession()
+                store.draft = "must not use the wrong model"
+                store.send()
+                try await waitUntil { !store.isBusy }
+                store.draft = "must not use the wrong model"
+                if store.selectedID != id, store.errorMessage != nil, !store.canSend {
+                    print("PASS rejected profile blocks submission with the session-start default")
+                } else { failures += 1; print("FAIL rejected profile left the wrong default model sendable") }
+
+                let rejectedID = store.selectedID
+                store.forkSession()
+                if !store.isBusy, store.selectedID == rejectedID {
+                    print("PASS rejected profile blocks fork admission")
+                } else { failures += 1; print("FAIL rejected profile admitted a fork with the wrong model") }
+                try await waitUntil { !store.isBusy }
+                if let rejectedID, store.selectedID != rejectedID {
+                    store.selectSession(rejectedID)
+                    try await waitUntil { !store.isBusy }
                 }
-                if store.isRunning { store.interrupt(); try await waitUntil { !store.isRunning } }
+                for method in ["goal/set", "goal/resume"] {
+                    store.actionError = nil; store.actionNotice = nil
+                    let parameters: [String: JSONValue] = method == "goal/set" ? ["objective": .string("Do not run with an unconfirmed model")] : [:]
+                    store.sessionAction(method, label: "Goal", parameters: parameters)
+                    try await waitUntil { store.pendingActions.isEmpty }
+                    if store.actionError?.localizedCaseInsensitiveContains("model") == true, store.actionNotice == nil {
+                        print("PASS rejected profile blocks \(method)")
+                    } else { failures += 1; print("FAIL rejected profile admitted \(method)") }
+                    // Before the fix, the isolated echo host may admit a goal.
+                    // Pause that goal so this regression never leaves it running.
+                    if store.current?.goal != .null {
+                        store.sessionAction("goal/pause", label: "Pause goal")
+                        try await waitUntil { store.pendingActions.isEmpty }
+                    }
+                    if store.isRunning { store.interrupt(); try await waitUntil { !store.isRunning } }
+                }
+            } else {
+                print("SKIP real Muse echo host checks: no installed muse executable")
             }
 
             guard let fixtureIndex = CommandLine.arguments.firstIndex(of: "--model-host"), fixtureIndex + 1 < CommandLine.arguments.count else {

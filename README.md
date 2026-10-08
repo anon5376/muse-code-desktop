@@ -1,83 +1,122 @@
-# Muse Code Desktop
+<p align="center">
+  <img src="Sources/MuseDesktop/Resources/MuseLogo.svg" width="56" alt="Muse logo">
+</p>
+<h1 align="center">Muse Code Desktop</h1>
+<p align="center">A native macOS workspace for the installed Muse Code CLI.<br>
+SwiftUI draws the interface; one supervised <code>muse serve</code> process runs the agent. No webview, no extra runtime, no third-party dependencies.</p>
 
-A native macOS workspace for the installed Muse Code CLI. SwiftUI draws the interface; one supervised `muse serve` process runs the agent. There is no webview or extra runtime.
+> **Unofficial desktop client — not affiliated with or endorsed by Meta.**
+> This is not the official Muse Code desktop app. Muse and its logo belong to Meta and are not covered by this project's MIT license.
 
-**Unofficial desktop client. This is not the official Muse Code desktop app and is not affiliated with or endorsed by Meta.**
+<p align="center">
+  <a href="https://github.com/anon5376/muse-code-desktop/releases/download/v0.1.0/muse-code-desktop-0.1.0-arm64.dmg"><strong>Download v0.1.0 (Apple Silicon)</strong></a> ·
+  <a href="https://github.com/anon5376/muse-code-desktop/releases/tag/v0.1.0">Release notes + checksum</a>
+</p>
 
-## Run
+<p align="center">
+  <img src="docs/media/workspace.png" width="880" alt="Muse Code workspace showing the session sidebar, transcript, and composer">
+</p>
 
-Build the app locally, then open it:
+## Demo
 
-```sh
-bash scripts/build-app.sh
-open "build/Muse Code.app"
+Real pixels, no staging: every capture shows the app driving its offline fixture host (`--echo` + `ReviewHost`), with the fixture banner left in frame on purpose. No provider, model, or tool ran during capture.
+
+<p align="center">
+  <a href="docs/media/demo.mp4"><img src="docs/media/demo.gif" width="880" alt="Short demo: markdown reply, approval card, palette, inspector, and compact resize"></a><br>
+  <sub><a href="docs/media/demo.mp4">Watch the MP4</a> — same beats, smoother</sub>
+</p>
+
+| | |
+| --- | --- |
+| ![Markdown transcript](docs/media/markdown.png) | ![Pending approval card](docs/media/approval.png) |
+| ![Command-K palette](docs/media/palette.png) | ![File inspector](docs/media/inspector.png) |
+
+## Requirements
+
+- macOS 14 or later, Apple Silicon (arm64 build; no Intel/universal artifact yet)
+- A working [Muse Code CLI](https://muse.ai/) installation, already logged in
+
+The app discovers Muse at `~/.local/bin/muse`, common Homebrew locations, or `PATH`. Settings can select another executable. Authentication stays in the CLI — the app never reads credentials — so if sign-in is needed, run `muse login` in Terminal, then reconnect.
+
+## Install
+
+1. Download the DMG and verify it:
+
+   ```sh
+   shasum -a 256 muse-code-desktop-0.1.0-arm64.dmg
+   # compare with the checksum file on the release page
+   ```
+
+2. Open the image and drag **Muse Code** into **Applications**.
+3. First launch: this build is **ad-hoc signed and not notarized**. Right-click the app and choose **Open**, or allow it under System Settings → Privacy & Security. If Finder reports the app as damaged, run `xattr -dr com.apple.quarantine "/Applications/Muse Code.app"` once.
+
+## First run
+
+Choose a project with **⌘O**, type a prompt, send with **⌘Return**. **⌘N** opens an unsaved draft — the first send creates its host session.
+
+| Keys | Action |
+| --- | --- |
+| ⌘Return | Send message |
+| ⌘N | New session (unsaved draft) |
+| ⌘O | Choose workspace |
+| ⌘K | Skills & commands palette (or `/` in an empty composer) |
+| ⌘⌥I | Toggle inspector (Files · Activity · Skills · Session) |
+| ⌘⌃S | Toggle session sidebar |
+| ⌘, | Settings |
+| ⌘. | Stop the current turn |
+
+## What it does
+
+- **Transcript-first workspace.** Native Markdown rendering (headings, lists, quotes, tables, selectable code blocks), session sidebar with search, running/attention states, and a composer that grows with your draft.
+- **Real model routing.** The picker reads Muse's actual catalog — provider/profile routes stay distinct, the configured default resolves to its real model, reasoning choices come from advertised variants, and the host's Contributor notice surfaces as an amber **Data use** badge. An explicit route must be accepted before a turn ships; a rejected profile blocks sends, forks, and goals.
+- **Explicit permission posture.** Approvals and questions stay above the composer while you browse; a request is never auto-decided — presentation receipts acknowledge, only your choice answers. Your configured approval and sandbox policy stays in force.
+- **Skills & palette.** Command-K lists session-catalog skills and commands; picking one attaches a removable chip. Unavailable skills are rejected before sending instead of being submitted as literal text.
+- **Inspection without an IDE.** Files, Activity, Skills, and Session tabs give read-only previews and host controls (rename, fork, compact, goal set/pause/resume, stop). **Open Muse in Terminal** covers plugin/MCP management, login, voice, and other CLI-only commands.
+
+## Architecture
+
+```
+Muse Code.app (SwiftUI/AppKit, macOS 14+, zero deps)
+  ├─ Sources/MuseCore      newline-delimited JSON-RPC transport, transcript reducer,
+  │                        bounded stderr tail, request-receipt contract, wire v1
+  ├─ Sources/MuseDesktop   window, sidebar, transcript, cards, palette, inspector
+  └─ Sources/MuseDiagnostics   isolated host check
+        │
+        └─ supervises:  muse serve   (installed separately; owns auth,
+                                     agent execution, tools, durable sessions)
 ```
 
-Choose a project with **⌘O**, enter a prompt, and send with **⌘Return**. **⌘N** opens an unsaved draft; the first send creates its host session. **⌘K** opens the skills and commands palette over the conversation, **⌘⌥I** toggles the inspector, **⌘⌃S** toggles sessions, and **⌘,** opens settings. The app discovers Muse at `~/.local/bin/muse`, common Homebrew locations, or PATH. Settings can select another executable.
-
-Use your existing Muse login and configuration. If sign-in is needed, run `muse login` in Terminal, then reconnect. Authentication remains in Muse; the app does not read credentials. Your configured approval and sandbox policy remains in force. Approval cards require an explicit choice.
-
-Signal Desk uses neutral charcoal, Muse blue for focus and selection, and amber for pending requests and model data-use notices. Approvals and questions stay above the composer while browsing commands or inspecting files. Replies render native headings, lists, quotes, tables and code blocks with Copy controls.
-
-## Models, skills, and tools
-
-The searchable model picker reads Muse's real catalog, keeps provider/profile routes distinct, and resolves the configured default to its actual model. The composer names the model and profile, with an amber **Data use** badge when the host supplies a Contributor notice; the picker exposes the full notice. Reasoning choices come from advertised variants, including the default, and are retained per session. An explicit model must be accepted before submitting a turn; failed profile selection also blocks goal execution and forks.
-
-Command-K, or `/` in an empty composer, opens skills and session commands. The inspector has **Files · Activity · Skills · Session** tabs. Skills offers search, source filtering, descriptions and **Use in chat**; choosing a skill inserts a removable attachment. Installed skills are checked against the session catalog before sending; trust and activation still apply. Goal and Activity also have direct title-band buttons.
-
-| Surface | Desktop behavior |
-| --- | --- |
-| Agent tools | The host executes configured tools; transcript and Activity expose calls, output, and permission requests. The stable host has no `tool/list` method. |
-| Session controls | Rename, fork, compact context, interrupt, and stop background tasks through MSP. |
-| Shell | Explicit commands through Muse's negotiated `userShell` capability. |
-| Goals | Set, pause, resume, or clear a goal using host controls. |
-| Agents/workflows | Contextual controls on actual agent and workflow activity, including result retrieval. |
-| Stored output | Fetch up to the first 256 KiB of referenced tool output. |
-| Extensions | Inspect the installed plugin list. Open the full Muse CLI for plugin/MCP management, login, voice, and terminal-only commands. |
-
-**Open Muse in Terminal** launches a separate terminal session in the chosen workspace. Full native parity with every terminal command is not claimed. There is no editable IDE or embedded terminal pane.
+Tests are standalone Swift executables rather than XCTest: `Tests/MuseCoreTests` covers transport/protocol behavior against real child processes, `Tests/MuseDesktopTests` drives the production store against the synthetic `ReviewHost`/`ModelHost` fixtures — which never touch a provider or run tools. The ReviewHost is also what powers the demo media and the offline UI fixture.
 
 ## Build and verify
 
-Requires macOS 14 or later, Apple's Swift command-line tools, and an installed Muse CLI. This build was verified on macOS 26.4, Apple Silicon, Swift 6.3.1, and Muse 1.4.2. It has no third-party dependencies.
-
-Quit the app before rebuilding its bundle.
-
 ```sh
-bash scripts/build-app.sh
-bash scripts/test.sh
-bash scripts/swift-local.sh run MuseDiagnostics
+bash scripts/build-app.sh      # build/Muse Code.app, ad-hoc signed
+bash scripts/test.sh           # core + workspace suites
+bash scripts/package-dmg.sh    # build/dist/muse-code-desktop-*-<arch>.dmg + .sha256
+bash scripts/verify-dmg.sh     # mount/install/copied-launch + missing-CLI checks
 ```
 
-The build script produces `build/Muse Code.app` and signs it locally with an ad-hoc signature. It is not notarized or signed for public distribution. `swift-local.sh` keeps compiler/package caches inside this project. Tests are standalone Swift executables because this Mac's command-line toolchain does not provide XCTest. They cover the production transport and store using actual isolated Muse echo sessions and local protocol fixtures.
+`scripts/swift-local.sh` keeps compiler and package caches inside the project. Quit the app before rebuilding its bundle. CI ([`build.yml`](.github/workflows/build.yml)) runs the same commands on a clean `macos-15` runner; the release workflow ([`release.yml`](.github/workflows/release.yml)) rebuilds, retests, repackages and publishes on each `v*` tag. The demo media is regenerated by [`demo-media.yml`](.github/workflows/demo-media.yml) via [`scripts/capture-demo.sh`](scripts/capture-demo.sh).
 
-Settings → **Test local connection** exercises the production transport against Muse's offline echo provider in a temporary, isolated session. It makes no model request and disables workspace tools. To inspect the entire UI in that mode:
+To inspect the whole UI offline against the real `muse` echo provider (no model calls, workspace tools disabled):
 
 ```sh
 open "build/Muse Code.app" --args --echo --workspace "$PWD"
 ```
 
-Quit any running copy first when changing launch mode. The offline banner remains visible throughout the test. Muse's echo provider may report an unsupported reminder child task; that failure remains visible even when the main echo turn succeeds.
+## Known limitations
 
-## Boundaries
+- Ad-hoc signature, no Developer ID, not notarized — the Gatekeeper step above is required.
+- Live-provider turns, real tool grants, durable history restore, and long-session stress are not covered by the fixture checks. The transcript's eager row layout trades measurement work for correctness under resize. See [acceptance](docs/acceptance.md).
+- Session listing shows the first 100 entries; file scanning skips hidden files/symlinks and caps at 2,000 entries / 256 KiB previews; stored-output reads cap at 256 KiB; patch retrieval is not implemented.
+- Wire envelope version 1 is required; a schema fingerprint mismatch is shown as a warning, and new Muse releases can require client updates.
+- Reconnection never resubmits a prompt automatically — check the session before retrying a timed-out send.
 
-- Faster model inference or tool execution has not been established. Native rendering, off-main-thread I/O, stable transcript identities, and batched updates target interface responsiveness. See [verification](docs/verification.md) for measured evidence.
-- Transcript rows are measured eagerly to avoid a SwiftUI layout loop when resizing rich replies with a pending request. Long-session performance remains unmeasured.
-- Real-provider turns, real tool approval/question flows, host action controls, durable recovery, and long-session performance require hands-on validation. Existing-session resume is implemented against the installed schema; the offline test cannot establish durable-history compatibility. See the [acceptance checklist](docs/acceptance.md).
-- Session listing currently displays at most the first 100 entries returned by Muse. Search filters that loaded list.
-- File scanning excludes hidden files, symlinks, and common generated directories, and stops at 2,000 entries / six directory levels. Previews are UTF-8 text, capped at 256 KiB. Inline tool output is bounded; stored-output retrieval shows its first 256 KiB. Patch retrieval is not implemented.
-- Wire envelope version 1 is required. A schema fingerprint mismatch is shown as a warning. New Muse releases can require client updates.
-- Reconnection never resubmits a prompt automatically. Check the session before retrying a timed-out submission.
-- Failed startup retains only the latest 8 KiB of host stderr in memory, exposed through collapsed error Details. Diagnostic text is not logged to disk.
-- Shutdown bounds the output drain and app termination wait. Whole-process-group cleanup of arbitrary tool descendants has not been established.
-- Pending requests set a Dock badge and request app attention. System notifications and global approval/deny shortcuts are not implemented.
+## Design
 
-## Project files
+[Signal Desk](DESIGN.md): neutral charcoal surfaces with one-point hairlines, Muse blue for selection and focus, amber for pending requests and data-use notices. The bundled logo is the unchanged SVG from Muse's public website — [provenance and license boundary](docs/brand-assets.md). Review evidence: [verification](docs/verification.md).
 
-`Sources/MuseCore` contains the JSON-RPC transport and transcript reducer. `Sources/MuseDesktop` contains the native app. `Sources/MuseDiagnostics` runs the isolated host check. [Design](DESIGN.md), [integration specification](docs/superpowers/specs/2026-10-08-muse-native-design.md), and [implementation plan](docs/superpowers/plans/2026-10-08-muse-native.md) record the scope and decisions.
+## License
 
-## License and release status
-
-The wrapper source is under the [MIT License](LICENSE). The separately installed Muse CLI is not included. Muse and its logo belong to Meta; the bundled logo and trademarks are not covered by this project's MIT license. See [logo provenance](docs/brand-assets.md).
-
-The owner authorized source publication as `muse-code-desktop` on 2026-10-08. This remains a test candidate: hands-on acceptance and live-provider checks are open. Promotion requires separate approval.
+The wrapper source is under the [MIT License](LICENSE). The Muse CLI is a separate installed product and is not included. Muse and its logo belong to Meta; the bundled logo and trademarks are **not** covered by the MIT license.

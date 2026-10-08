@@ -1,0 +1,36 @@
+name: demo-media
+
+# Captures genuine app media on demand. Every frame is the real app driven
+# through its UI against the synthetic ReviewHost fixture — never a provider,
+# tool, or real prompt. Artifacts are reviewed, then committed under
+# docs/media/ for the README.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build app bundle
+        run: bash scripts/build-app.sh release
+
+      - name: Capture demo beats
+        run: bash scripts/capture-demo.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: demo-media-${{ github.sha }}
+          path: build/demo/media/
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: demo-frames-${{ github.sha }}
+          path: build/demo/shots/
+          retention-days: 30
