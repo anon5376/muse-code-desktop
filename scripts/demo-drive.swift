@@ -102,17 +102,17 @@ case "drag":
     postMouse(target, .leftMouseUp, CGPoint(x: x2, y: y2))
     print("Dragged \(Int(x1)),\(Int(y1)) -> \(Int(x2)),\(Int(y2))")
 case "shot":
-    // Direct window raster; works when this process has screen-recording
-    // access. capture-demo.sh prefers /usr/sbin/screencapture first.
+    // CGWindowListCreateImage is obsoleted in the macOS 15 SDK; delegate to
+    // /usr/sbin/screencapture, which capture-demo.sh also prefers directly.
     let target = pid(2)
-    guard args.count >= 4, let info = windowInfo(target),
-          let image = CGWindowListCreateImage(.null, .optionIncludingWindow, info.id, [.boundsIgnoreFraming, .bestResolution]) else {
-        fatalError("Window capture unavailable")
-    }
-    let rep = NSBitmapImageRep(cgImage: image)
-    guard let data = rep.representation(using: NSBitmapImageRep.FileType.png, properties: [:]) else { fatalError("PNG encoding failed") }
-    try data.write(to: URL(fileURLWithPath: args[3]))
-    print("Saved \(args[3]) (\(image.width)x\(image.height))")
+    guard args.count >= 4, let info = windowInfo(target) else { fatalError("Window capture unavailable") }
+    let capture = Process()
+    capture.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
+    capture.arguments = ["-x", "-o", "-l", String(info.id), args[3]]
+    try capture.run()
+    capture.waitUntilExit()
+    guard capture.terminationStatus == 0 else { fatalError("screencapture exited \(capture.terminationStatus)") }
+    print("Saved \(args[3]) (window \(info.id))")
 case "dump":
     // Only useful when the process is already accessibility-trusted; the
     // event path above never requires it.
