@@ -95,11 +95,15 @@ key 36 command
 sleep 3
 shot 03-markdown
 
-echo "--- beat: 40-line approval card"
-# Re-click the composer: focus state survives send but the text view needs a
-# real press after the transcript re-renders. The fixture prompt renders the card.
-click $((WIN_X + 700)) $((WIN_Y + WIN_H - 112))
-sleep 0.8
+echo "--- beat: new session -> 40-line approval card"
+# A fresh session restores the suggestion cards: card click sets the draft and
+# focuses the composer, then Cmd-A + type swaps in the fixture prompt.
+key 45 command
+sleep 1.5
+click $((WIN_X + 700)) $((WIN_Y + 265))
+sleep 1
+key 0 command
+sleep 0.3
 type "please present the approval fixture"
 key 36 command
 sleep 3
@@ -153,9 +157,13 @@ sleep 1
 shot 13-resolved
 if ! kill -0 "$app_pid" 2>/dev/null; then echo "App terminated unexpectedly during the regression" >&2; exit 1; fi
 
-echo "--- beat: question card"
-click $((WIN_X + 600)) $((WIN_Y + WIN_H - 112))
-sleep 0.8
+echo "--- beat: question card in a fresh session"
+key 45 command
+sleep 1.5
+click $((WIN_X + 600)) $((WIN_Y + 240))
+sleep 1
+key 0 command
+sleep 0.3
 type "please present the question fixture"
 key 36 command
 sleep 2
