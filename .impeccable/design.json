@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T02:08:08Z",
+  "title": "Design System: Muse Code Desktop",
+  "extensions": {
+    "platform": {
+      "family": "macOS native desktop",
+      "applicationLifecycle": "AppKit NSApplication and NSWindow hosting SwiftUI views",
+      "uiFrameworks": ["AppKit", "SwiftUI"],
+      "implementationLanguage": "Swift"
+    },
+    "nativeComponents": [
+      { "name": "Workspace window", "kind": "window", "source": "Sources/MuseDesktop/MuseDesktopApp.swift", "description": "AppKit window opens at 1280 × 820 pt, with a verified minimum outer size of 980 × 640 pt." },
+      { "name": "Session navigation", "kind": "navigation", "source": "Sources/MuseDesktop/WorkspaceView.swift", "description": "Hideable 248 pt sidebar for workspace choice, session search and selection, engine state, and settings." },
+      { "name": "Workspace composer", "kind": "input", "source": "Sources/MuseDesktop/WorkspaceView.swift", "description": "Raised 12 pt rounded SwiftUI editor with model selection, context action, send or stop action, and a blue focus stroke." },
+      { "name": "Model picker", "kind": "custom", "source": "Sources/MuseDesktop/ModelPicker.swift", "description": "380 × 500 pt native popover for real model routes, reasoning preference, and data-use notices." },
+      { "name": "Command palette", "kind": "custom", "source": "Sources/MuseDesktop/LibraryView.swift", "description": "Command-K skill and command palette bounded to 560 × 420 pt maximum in the available reading region." },
+      { "name": "Transcript and activity", "kind": "custom", "source": "Sources/MuseDesktop/TranscriptView.swift", "description": "Selectable conversation, Markdown blocks, tool activity, and host-backed pending requests." },
+      { "name": "Workspace inspector", "kind": "custom", "source": "Sources/MuseDesktop/InspectorView.swift", "description": "Optional responsive pane for read-only files, activity, skills, and session details." },
+      { "name": "Icon button", "kind": "button", "source": "Sources/MuseDesktop/Theme.swift", "description": "Accessible 30 pt native-feeling icon control with hover and selected surface feedback." },
+      { "name": "Muse logo and app icon", "kind": "icon", "source": "Sources/MuseDesktop/Resources/MuseLogo.svg", "description": "Unchanged SVG from Muse's public website, rendered natively and on the charcoal app-icon tile. Sidebar, Settings and About identify this as an unofficial client. Provenance and third-party license boundary are in docs/brand-assets.md; review captures remain local evidence." }
+    ],
+    "motion": [],
+    "breakpoints": [
+      { "name": "inspector-placement", "value": "560pt center area", "purpose": "Inspector sits beside the conversation when this width remains; otherwise it overlays the reading region." },
+      { "name": "minimum-window", "value": "980 × 640pt", "purpose": "Verified minimum outer window size." }
+    ],
+    "elevation": {
+      "strategy": "Flat charcoal regions and one-point dividers; native system popovers provide platform chrome.",
+      "shadows": []
+    }
+  },
+  "components": [],
+  "narrative": {
+    "northStar": "Signal Desk",
+    "overview": "Signal Desk is a native macOS workspace for reading Muse's work, choosing its actual model route, and answering requests. Neutral charcoal regions keep attention on conversation and tool output; Muse blue marks selection and focus, while amber makes decisions and data-use notices easy to find. Native controls and system typography keep the application legible and at home on macOS.\n\nThe interface is flat and content-led. Tonal surfaces and hairline dividers define the workspace; custom decoration does not compete with the work. The product preserves the installed Muse CLI as its execution engine and presents host state directly. The app's responsive interface does not establish faster inference or tool execution.",
+    "keyCharacteristics": ["Native AppKit window and lifecycle hosting SwiftUI workspace views.", "Neutral charcoal surfaces, Muse blue for selection and focus, amber for user attention.", "Transcript-first layout with optional session navigation and read-only inspection."],
+    "rules": [
+      { "name": "The Legible Muted Text Rule", "body": "Do not replace muted text with the lower-contrast gray used in the superseded direction; small text must remain readable on the charcoal surfaces.", "section": "colors" },
+      { "name": "The Native Type Rule", "body": "Use macOS system text and SF Symbols for interface controls; use system monospace where exact technical characters matter.", "section": "typography" }
+    ],
+    "dos": ["Do use Muse blue for selection and focus, amber for requests and data-use notices, and the deeper control blue for native filled controls.", "Do keep request choices and answers visible while their request content scrolls.", "Do preserve native text selection, keyboard focus, menus, popovers, and system control behavior.", "Do keep session, model, tool, and permission states tied to actual host data."],
+    "donts": ["Don't invent session history, model metadata, usage figures, tool outcomes, or permission grants.", "Don't present the read-only inspector as an editable IDE.", "Don't imply faster inference or tool execution from the native interface.", "Don't add decorative shadows, gradients, hero graphics, or fake physical materials."]
+  }
+}

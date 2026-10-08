@@ -1,0 +1,14 @@
+.build/
+build/
+.swiftpm/
+.DS_Store
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/config.local.json
+docs/claude-design-brief.md
+.env
+.env.*
+!.env.example
+*.log
+xcuserdata/
+*.xcuserstate
