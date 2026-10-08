@@ -85,31 +85,33 @@ geom() { read -r WIN_ID WIN_X WIN_Y WIN_W WIN_H <<< "$( { "$drive_bin" window "$
 echo "--- beat: workspace at rest"
 shot 01-workspace
 
-echo "--- beat: command palette -> synthetic skill -> markdown reply"
-# Selecting the skill sets pendingSkill and focuses the composer (the only
-# keyboard-reachable way to focus it); the chip then scopes the next send.
-key 40 command
+echo "--- beat: suggestion card fills the composer, then a markdown reply"
+# Suggestion cards are real buttons: clicking one sets the draft AND focuses
+# the composer (the only click-reachable focus path that is reliable here).
+click $((WIN_X + 700)) $((WIN_Y + 265))
 sleep 1
-shot 02-palette
-type "synthetic"
-sleep 0.8
-shot 03-palette-filtered
-key 36
-sleep 0.8
-shot 04-skill-chip
-type "Draft a short native markdown reply for the README demo."
-sleep 0.5
-shot 05-composer-draft
+shot 02-composer-draft
 key 36 command
 sleep 3
-shot 06-markdown
+shot 03-markdown
 
 echo "--- beat: 40-line approval card"
-# Composer keeps focus after a send; the fixture prompt swaps the transcript.
+# The composer keeps focus after a send; the fixture prompt renders the card.
 type "please present the approval fixture"
 key 36 command
 sleep 3
-shot 07-approval
+shot 04-approval
+
+echo "--- beat: command palette -> synthetic skill chip"
+key 40 command
+sleep 2
+shot 05-palette
+type "synthetic"
+sleep 1
+shot 06-palette-filtered
+key 36
+sleep 1.5
+shot 07-skill-chip
 
 echo "--- beat: inspector files"
 key 34 command option
@@ -134,10 +136,10 @@ geom
 echo "  resized to ${WIN_W}x${WIN_H}"
 shot 11-compact
 key 40 command
-sleep 1
+sleep 2
 shot 12-compact-palette
 key 53
-sleep 0.8
+sleep 1
 
 echo "--- beat: deny the synthetic request (app must stay responsive)"
 DENY_X=$((WIN_X + 249 + 36 + 85 + 8 + 125 + 8 + 28))
@@ -149,11 +151,11 @@ if ! kill -0 "$app_pid" 2>/dev/null; then echo "App terminated unexpectedly duri
 
 echo "--- beat: question card"
 key 40 command
-sleep 1
+sleep 2
 type "synthetic"
-sleep 0.8
+sleep 1
 key 36
-sleep 0.8
+sleep 1.5
 type "please present the question fixture"
 key 36 command
 sleep 2
