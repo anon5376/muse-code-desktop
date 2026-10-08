@@ -106,11 +106,11 @@ case "shot":
     // access. capture-demo.sh prefers /usr/sbin/screencapture first.
     let target = pid(2)
     guard args.count >= 4, let info = windowInfo(target),
-          let image = CGWindowListCreateImage(.null, .optionIncludingWindow, info.id, [.bounds, .bestResolution]) else {
+          let image = CGWindowListCreateImage(.null, .optionIncludingWindow, info.id, [.boundsIgnoreFraming, .bestResolution]) else {
         fatalError("Window capture unavailable")
     }
     let rep = NSBitmapImageRep(cgImage: image)
-    guard let data = rep.representation(using: .png, properties: [:]) else { fatalError("PNG encoding failed") }
+    guard let data = rep.representation(using: NSBitmapImageRep.FileType.png, properties: [:]) else { fatalError("PNG encoding failed") }
     try data.write(to: URL(fileURLWithPath: args[3]))
     print("Saved \(args[3]) (\(image.width)x\(image.height))")
 case "dump":

@@ -162,7 +162,10 @@ enum StoreTests {
             fixtureStore.workspace = root
             fixtureStore.executablePath = CommandLine.arguments[fixtureIndex + 1]
             await fixtureStore.start()
-            guard let model = fixtureStore.models.first else { throw Failure(description: "The model fixture did not connect") }
+            try await waitUntil { !fixtureStore.models.isEmpty || fixtureStore.errorMessage != nil }
+            guard let model = fixtureStore.models.first else {
+                throw Failure(description: "The model fixture did not connect: \(fixtureStore.errorMessage ?? "no error")")
+            }
             // The configured default is a real route, so its advertised effort
             // choices must be usable before a session exists.
             fixtureStore.chooseReasoning("high")
