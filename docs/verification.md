@@ -41,7 +41,7 @@ Earlier installed inventory reported 67 skills; an actual echo session exposed 5
 
 Own-app accessibility and window captures verified actual outer sizes **1280 × 820** and **980 × 640**. The minimum no longer produces a 672-point outer window. At compact width the inspector overlays the reading area; the composer and pending request controls stay visible. The 380 × 500 pt model panel produces a native 406 × 526 pt popover contained within the compact parent window.
 
-The requested real-logo revision uses the unchanged SVG from Muse's public website, with matching SHA-256 in the source and packaged resource. AppKit loaded the packaged SVG directly. Actual-window inspection confirmed the logo and **Unofficial desktop client** label at [1280 × 820](../.impeccable/review/muse-logo-desktop.png) and [980 × 640](../.impeccable/review/muse-logo-compact.png). [Settings](../.impeccable/review/muse-logo-settings.png) and [About](../.impeccable/review/muse-logo-about.png) visibly state that this is not the official Muse Code desktop app and is not affiliated with or endorsed by Meta. The app-icon raster was also inspected. The 14 core and 19 workspace checks were rerun and passed; no real-provider turn was sent. Earlier Signal Desk captures below precede this branding-only revision. See [asset provenance](brand-assets.md).
+The requested real-logo revision uses the unchanged SVG from Muse's public website, with matching SHA-256 in the source and packaged resource. AppKit loaded the packaged SVG directly. Actual-window inspection confirmed the logo and **Unofficial desktop client** label at 1280 × 820 and 980 × 640 (local captures `muse-logo-desktop.png` and `muse-logo-compact.png`). Settings and About visibly state that this is not the official Muse Code desktop app and is not affiliated with or endorsed by Meta. The app-icon raster was also inspected. The 14 core and 19 workspace checks were rerun and passed; no real-provider turn was sent. Earlier Signal Desk captures below precede this branding-only revision. See [asset provenance](brand-assets.md).
 
 All fixture windows display **Offline UI fixture · synthetic data, no provider or tools**. Synthetic checks exercised a 40-line request body, explicit denial, a single-choice question/answer, native headings/lists/quotes/tables/fenced code, removable skill selection, and actual project file preview/Add to message. No synthetic command was executed. A pending approval remained visible with palette and inspector open; decisions and answer buttons stay outside scrolling bodies.
 
@@ -57,14 +57,14 @@ An earlier actual Muse echo UI check sent a local echo prompt through Command-Re
 
 | State | 1280 × 820 | 980 × 640 | Content provenance |
 | --- | --- | --- | --- |
-| Empty workspace | [Desktop](../.impeccable/review/signal-desktop.png) | [Compact](../.impeccable/review/signal-empty-compact.png) | Normal metadata / explicitly labeled synthetic host |
-| Model picker | [Desktop](../.impeccable/review/signal-models.png) | [Compact](../.impeccable/review/signal-models-compact.png) | Actual Muse catalog; no turn |
-| Command palette | [Desktop](../.impeccable/review/signal-palette.png) | [Compact](../.impeccable/review/signal-palette-compact.png) | Synthetic skill; final keyboard repair |
-| Markdown | [Desktop](../.impeccable/review/signal-markdown.png) | [Compact](../.impeccable/review/signal-markdown-compact.png) | Synthetic response |
-| Pending approval | [Desktop](../.impeccable/review/signal-approval.png) | [Palette](../.impeccable/review/signal-approval-palette-compact.png), [inspector](../.impeccable/review/signal-approval-inspector-compact.png) | Synthetic 40-line command; no execution |
-| Question | [Desktop](../.impeccable/review/signal-question.png) | [Compact](../.impeccable/review/signal-question-compact.png) | Synthetic single choice |
-| Files | [Desktop](../.impeccable/review/signal-files.png) | [Compact](../.impeccable/review/signal-files-compact.png) | Actual project source and synthetic reply |
-| Inspector tabs | [Activity](../.impeccable/review/signal-activity.png), [Skills](../.impeccable/review/signal-skills.png), [Session](../.impeccable/review/signal-session.png) | Overlay behavior covered above | Synthetic host; empty Activity is intentional |
+| Empty workspace | Desktop (`signal-desktop.png`) | Compact (`signal-empty-compact.png`) | Normal metadata / explicitly labeled synthetic host |
+| Model picker | Desktop (`signal-models.png`) | Compact (`signal-models-compact.png`) | Actual Muse catalog; no turn |
+| Command palette | Desktop (`signal-palette.png`) | Compact (`signal-palette-compact.png`) | Synthetic skill; final keyboard repair |
+| Markdown | Desktop (`signal-markdown.png`) | Compact (`signal-markdown-compact.png`) | Synthetic response |
+| Pending approval | Desktop (`signal-approval.png`) | Palette (`signal-approval-palette-compact.png`), inspector (`signal-approval-inspector-compact.png`) | Synthetic 40-line command; no execution |
+| Question | Desktop (`signal-question.png`) | Compact (`signal-question-compact.png`) | Synthetic single choice |
+| Files | Desktop (`signal-files.png`) | Compact (`signal-files-compact.png`) | Actual project source and synthetic reply |
+| Inspector tabs | Activity (`signal-activity.png`), Skills (`signal-skills.png`), Session (`signal-session.png`) | Overlay behavior covered above | Synthetic host; empty Activity is intentional |
 
 Captures are local evidence and excluded from publication. Earlier meta-* and orange captures are historical, not current layout evidence. Native traffic lights retain standard placement. No system notification delivery, long-session stress or exhaustive accessibility audit is claimed.
 
