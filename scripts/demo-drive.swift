@@ -42,13 +42,13 @@ func postKey(_ pid: Int32, _ code: UInt16, command: Bool = false, option: Bool =
         if shift { flags.insert(.maskShift) }
         if control { flags.insert(.maskControl) }
         event.flags = flags
-        event.postToPid(pid)
+        event.post(tap: .cghidEventTap)
     }
 }
 
 func postMouse(_ pid: Int32, _ type: CGEventType, _ point: CGPoint) {
     guard let event = CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: point, mouseButton: .left) else { fatalError("Mouse event unavailable") }
-    event.postToPid(pid)
+    event.post(tap: .cghidEventTap)
     usleep(30_000)
 }
 
@@ -77,7 +77,7 @@ case "type":
     for pressed in [true, false] {
         guard let event = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: pressed) else { fatalError("Key event unavailable") }
         units.withUnsafeBufferPointer { event.keyboardSetUnicodeString(stringLength: units.count, unicodeString: $0.baseAddress) }
-        event.postToPid(target)
+        event.post(tap: .cghidEventTap)
     }
     print("Typed \(args[3].count) chars to \(target)")
 case "click":
