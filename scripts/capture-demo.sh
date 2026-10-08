@@ -101,7 +101,8 @@ echo "--- beat: 40-line approval card"
 click $((WIN_X + 150)) $((WIN_Y + 264))
 sleep 1.5
 type "please present the approval fixture"
-click $((WIN_X + WIN_W - 62)) $((WIN_Y + WIN_H - 73))
+click $((WIN_X + WIN_W - 55)) $((WIN_Y + WIN_H - 60))
+key 36 command
 sleep 3
 shot 04-approval
 
@@ -157,7 +158,8 @@ echo "--- beat: question card"
 click $((WIN_X + 150)) $((WIN_Y + 264))
 sleep 1.5
 type "please present the question fixture"
-click $((WIN_X + WIN_W - 62)) $((WIN_Y + WIN_H - 73))
+click $((WIN_X + WIN_W - 55)) $((WIN_Y + WIN_H - 60))
+key 36 command
 sleep 2
 shot 14-question
 # First option row, then the card's Send/answer control.
