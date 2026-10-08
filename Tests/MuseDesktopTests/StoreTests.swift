@@ -32,10 +32,10 @@ enum StoreTests {
             if catalogStore.chosenModel?.id == contributor.id, catalogStore.modelLabel.contains("Contributor") {
                 print("PASS configured default resolves to its actual catalog model")
             } else { failures += 1; print("FAIL configured default hides its actual model") }
+            try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
             // The lifecycle checks below exercise a real `muse serve --provider echo` host.
             // Without an installed CLI they are skipped, not failed.
             if MuseExecutable.locate() != nil {
-                try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
                 store.workspace = root
                 await store.start()
                 guard store.engine == .ready else { throw Failure(description: store.errorMessage ?? "Host did not connect") }
