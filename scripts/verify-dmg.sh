@@ -55,7 +55,6 @@ WIN_ID="${window%%,*}"
 /usr/sbin/screencapture -x -o -l "$WIN_ID" "$verify_dir/copied-app.png" 2>/dev/null || \
     "$drive_bin" shot "$app_pid" "$verify_dir/copied-app.png"
 echo "PASS: app copied from DMG presents a window ($window)"
-kill "$app_pid" 2>/dev/null || true; wait "$app_pid" 2>/dev/null || true
 
 # A window alone does not prove the host connected — the app opens its window
 # before the handshake completes. The supervised host must be a live child of
@@ -67,6 +66,7 @@ else
     pgrep -P "$app_pid" -l >&2 || true
     echo "FAIL: ReviewHost is not running under the app" >&2; exit 1
 fi
+kill "$app_pid" 2>/dev/null || true; wait "$app_pid" 2>/dev/null || true
 
 echo "--- launch with an unavailable Muse executable (missing-prerequisite check)"
 # Pointing at a nonexistent binary exercises the error path even on machines
