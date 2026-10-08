@@ -89,6 +89,7 @@ struct SkillsInspectorView: View {
     @ObservedObject var store: WorkspaceStore
     @State private var query = ""
     @State private var source = "All"
+    @State private var expanded = Set<String>()
     private var skills: [SkillEntry] { store.skills.filter { $0.matches(query) && (source == "All" || $0.source == source) } }
     var body: some View {
         VStack(spacing: 12) {
@@ -106,7 +107,23 @@ struct SkillsInspectorView: View {
                 LazyVStack(alignment: .leading, spacing: 16) {
                     if let error = store.skillsError { Text(error).foregroundStyle(MuseTheme.error) }
                     ForEach(skills) { skill in
-                        DisclosureGroup {
+                        // Custom-label DisclosureGroup has a dead pointer hit path on macOS
+                        // (only AX toggles it), so expansion is an explicit Button row.
+                        let isExpanded = expanded.contains(skill.id)
+                        Button {
+                            if isExpanded { expanded.remove(skill.id) } else { expanded.insert(skill.id) }
+                        } label: {
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold))
+                                    .foregroundStyle(MuseTheme.muted).rotationEffect(.degrees(isExpanded ? 90 : 0)).padding(.top, 4)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(skill.name).font(.system(size: 13, weight: .medium))
+                                    Text(skill.source.capitalized + (skill.isEnabled ? "" : " · Disabled")).font(.system(size: 11)).foregroundStyle(MuseTheme.secondary)
+                                }
+                                Spacer(minLength: 0)
+                            }.padding(.vertical, 4).contentShape(Rectangle())
+                        }.buttonStyle(.plain).accessibilityLabel("Show details for \(skill.name)")
+                        if isExpanded {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text(skill.description.isEmpty ? "No description supplied by Muse." : skill.description).font(.system(size: 12)).lineSpacing(4).textSelection(.enabled)
                                 Text("/" + skill.invocationName).font(.system(size: 11, design: .monospaced)).foregroundStyle(MuseTheme.secondary)
@@ -115,12 +132,7 @@ struct SkillsInspectorView: View {
                                     .buttonStyle(.borderedProminent).tint(MuseTheme.controlAccent)
                                     .disabled(!skill.isEnabled || store.engine != .ready || store.isBusy || store.isRunning || store.isChangingModel)
                                     .accessibilityLabel("Use skill \(skill.name)")
-                            }.padding(.top, 8)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(skill.name).font(.system(size: 13, weight: .medium))
-                                Text(skill.source.capitalized + (skill.isEnabled ? "" : " · Disabled")).font(.system(size: 11)).foregroundStyle(MuseTheme.secondary)
-                            }
+                            }.padding(.top, 8).padding(.leading, 18)
                         }
                         Hairline()
                     }

@@ -29,7 +29,8 @@ Real pixels, no staging: every capture shows the app driving its offline fixture
 | | |
 | --- | --- |
 | ![Markdown transcript](docs/media/markdown.png) | ![Pending approval card](docs/media/approval.png) |
-| ![Command-K palette](docs/media/palette.png) | ![File inspector](docs/media/inspector.png) |
+| ![Question card](docs/media/question.png) | ![File inspector](docs/media/inspector.png) |
+| ![Command-K palette](docs/media/palette.png) | ![Model picker](docs/media/model-picker.png) |
 
 ## Requirements
 
