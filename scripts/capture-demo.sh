@@ -96,7 +96,10 @@ sleep 3
 shot 03-markdown
 
 echo "--- beat: 40-line approval card"
-# The composer keeps focus after a send; the fixture prompt renders the card.
+# Re-click the composer: focus state survives send but the text view needs a
+# real press after the transcript re-renders. The fixture prompt renders the card.
+click $((WIN_X + 700)) $((WIN_Y + WIN_H - 112))
+sleep 0.8
 type "please present the approval fixture"
 key 36 command
 sleep 3
@@ -138,7 +141,8 @@ shot 11-compact
 key 40 command
 sleep 2
 shot 12-compact-palette
-key 53
+# Close via the palette's own X button (reliable), not Escape.
+click $((WIN_X + WIN_W * 87 / 100)) $((WIN_Y + WIN_H * 19 / 100))
 sleep 1
 
 echo "--- beat: deny the synthetic request (app must stay responsive)"
@@ -150,12 +154,8 @@ shot 13-resolved
 if ! kill -0 "$app_pid" 2>/dev/null; then echo "App terminated unexpectedly during the regression" >&2; exit 1; fi
 
 echo "--- beat: question card"
-key 40 command
-sleep 2
-type "synthetic"
-sleep 1
-key 36
-sleep 1.5
+click $((WIN_X + 600)) $((WIN_Y + WIN_H - 112))
+sleep 0.8
 type "please present the question fixture"
 key 36 command
 sleep 2

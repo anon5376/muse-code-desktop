@@ -84,6 +84,10 @@ case "click":
     let target = pid(2)
     guard args.count >= 5, let x = Double(args[3]), let y = Double(args[4]) else { fatalError("Usage: click <pid> <x> <y>") }
     let point = CGPoint(x: x, y: y)
+    // Move first: SwiftUI/AppKit tracking areas need hover state before a
+    // click is treated as a real press.
+    postMouse(target, .mouseMoved, point)
+    usleep(80_000)
     postMouse(target, .leftMouseDown, point)
     postMouse(target, .leftMouseUp, point)
     print("Clicked \(Int(x)),\(Int(y))")
