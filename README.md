@@ -4,11 +4,11 @@
 
 <img src="Sources/MuseDesktop/Resources/MuseLogo.svg" width="72" alt="Muse logo">
 
-# Muse Code Desktop
+<h1>Muse Code Desktop</h1>
 
-**A native macOS workspace for your Muse Code CLI.**
-SwiftUI draws the interface · one supervised `muse serve` process runs the agent.
-No webview · no extra runtime · zero third-party dependencies.
+<p><strong>A native macOS workspace for your Muse Code CLI.</strong><br>
+SwiftUI draws the interface · one supervised <code>muse serve</code> process runs the agent.<br>
+No webview · no extra runtime · zero third-party dependencies.</p>
 
 <br>
 
@@ -20,9 +20,11 @@ No webview · no extra runtime · zero third-party dependencies.
 
 <br><br>
 
-> **Unofficial desktop client — not affiliated with or endorsed by Meta.**
-> This is not the official Muse Code desktop app. Muse and its logo belong to Meta
-> and are not covered by this project's MIT license.
+<blockquote>
+<strong>Unofficial desktop client — not affiliated with or endorsed by Meta.</strong><br>
+This is not the official Muse Code desktop app. Muse and its logo belong to Meta
+and are not covered by this project's MIT license.
+</blockquote>
 
 <br>
 
