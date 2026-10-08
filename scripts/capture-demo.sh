@@ -15,7 +15,7 @@ media_dir="${1:-$demo_root/media}"
 shots="$demo_root/shots"
 fixture_ws="$demo_root/hello-muse"
 drive_bin="$demo_root/demo-drive"
-host_bin="$project_root/.build/debug/MuseReviewHost"
+host_bin="$demo_root/MuseReviewHost"
 
 # ---------------------------------------------------------------- fixtures
 rm -rf "$demo_root"; mkdir -p "$media_dir" "$shots"
