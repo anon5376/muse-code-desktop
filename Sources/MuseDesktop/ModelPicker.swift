@@ -7,11 +7,19 @@ struct ModelPickerControl: View {
     var body: some View {
         Button { presented.toggle() } label: { controlLabel }
         .buttonStyle(.plain).frame(maxWidth: 360, alignment: .trailing)
-        .help(store.modelLabel + (store.chosenModel?.dataUseNotice.map { "\n" + $0 } ?? "") + "\nChoose model and reasoning level")
-        .accessibilityLabel("Choose model").accessibilityValue(store.modelLabel + (store.chosenModel?.dataUseNotice == nil ? "" : ", data-use notice"))
+        .help(helpText)
+        .accessibilityLabel("Choose model").accessibilityValue(accessibilityValue)
         .popover(isPresented: $presented, arrowEdge: .top) {
             ModelPickerPanel(store: store).task { await store.refreshModels() }
         }
+    }
+
+    private var helpText: String {
+        store.modelLabel + (store.chosenModel?.dataUseNotice.map { "\n" + $0 } ?? "") + "\nChoose model and reasoning level"
+    }
+
+    private var accessibilityValue: String {
+        store.modelLabel + (store.chosenModel?.dataUseNotice == nil ? "" : ", data-use notice")
     }
 
     private var composerModelLabel: String {
