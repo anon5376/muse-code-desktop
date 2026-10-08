@@ -214,7 +214,7 @@ struct WorkspaceView: View {
                 Text("Continue").font(.system(size: 11, weight: .semibold)).foregroundStyle(MuseTheme.secondary).padding(.bottom, 8)
                 ForEach(Array(store.visibleSessions.prefix(3))) { session in
                     Button { store.selectSession(session.id) } label: {
-                        HStack { Text(session.title).lineLimit(1); Spacer(); Image(systemName: "arrow.right") }.font(.system(size: 13)).padding(.vertical, 10).contentShape(Rectangle())
+                        HStack { Text(session.title).lineLimit(1).truncationMode(.tail); Spacer(); Image(systemName: "arrow.right") }.font(.system(size: 13)).padding(.vertical, 10).contentShape(Rectangle())
                     }.buttonStyle(.plain)
                 }
                 Hairline().padding(.vertical, 16)
@@ -235,7 +235,12 @@ struct WorkspaceView: View {
     }
 
     private func starter(_ title: String, symbol: String, prompt: String) -> some View {
-        Button { store.draft = prompt; composerFocused = true } label: {
+        // Fill the composer only when it is empty — a click must not silently
+        // destroy a draft the user already wrote.
+        Button {
+            if store.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { store.draft = prompt }
+            composerFocused = true
+        } label: {
             HStack(spacing: 13) {
                 Image(systemName: symbol).font(.system(size: 14)).foregroundStyle(MuseTheme.muted).frame(width: 18)
                 VStack(alignment: .leading, spacing: 4) {

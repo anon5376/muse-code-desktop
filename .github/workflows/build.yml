@@ -1,0 +1,49 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-package:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release app
+        run: bash scripts/build-app.sh release
+
+      - name: Run tests
+        run: bash scripts/test.sh
+
+      - name: Verify signature and bundle
+        run: |
+          codesign --verify --deep --strict "build/Muse Code.app"
+          codesign -dv "build/Muse Code.app" 2>&1 | grep -i "signature"
+          plutil -lint "build/Muse Code.app/Contents/Info.plist"
+          file "build/Muse Code.app/Contents/MacOS/MuseDesktop" | grep -i arm64
+          test -f "build/Muse Code.app/Contents/Resources/Muse.icns"
+          test -d "build/Muse Code.app/Contents/Resources/MuseNative_MuseDesktop.bundle"
+
+      - name: Package DMG
+        run: bash scripts/package-dmg.sh
+
+      - name: Verify DMG end to end
+        run: bash scripts/verify-dmg.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dmg-${{ github.sha }}
+          path: build/dist/
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verify-evidence-${{ github.sha }}
+          path: build/verify/
+          retention-days: 14

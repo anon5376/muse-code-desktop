@@ -72,7 +72,9 @@ struct SettingsView: View {
             defer { testing = false }
             do {
                 let result = try await EchoDiagnostic.run(executable: executable)
-                diagnostic = "Passed: Muse \(result.version), streamed echo reply and clean shutdown in \(result.elapsedMilliseconds) ms."
+                diagnostic = result.reply.hasPrefix("echo:")
+                    ? "Passed: Muse \(result.version), streamed echo reply and clean shutdown in \(result.elapsedMilliseconds) ms."
+                    : "Passed: Muse \(result.version) completed a streamed turn and clean shutdown in \(result.elapsedMilliseconds) ms. (Host did not echo the probe text — it is a fixture or non-echo provider, not the real echo CLI.)"
             } catch { diagnostic = "Failed: \(error.localizedDescription)" }
         }
     }

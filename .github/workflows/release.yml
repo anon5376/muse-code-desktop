@@ -1,0 +1,46 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release app
+        run: bash scripts/build-app.sh release
+
+      - name: Run tests
+        run: bash scripts/test.sh
+
+      - name: Package DMG
+        run: bash scripts/package-dmg.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Verify DMG end to end
+        run: bash scripts/verify-dmg.sh
+
+      - name: Publish GitHub prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          notes="docs/release-notes/${TAG}.md"
+          if [[ ! -f "$notes" ]]; then
+            printf '# Muse Code Desktop %s\n\nSee the README for installation.\n' "$TAG" > "$notes"
+          fi
+          shopt -s nullglob
+          assets=( build/dist/muse-code-desktop-*.dmg build/dist/muse-code-desktop-*.sha256 )
+          gh release create "$TAG" \
+            --repo "${{ github.repository }}" \
+            --title "Muse Code Desktop ${TAG}" \
+            --prerelease \
+            --notes-file "$notes" \
+            "${assets[@]}"

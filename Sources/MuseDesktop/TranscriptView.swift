@@ -131,16 +131,14 @@ struct ApprovalCard: View {
                 Text(directory).font(.system(size: 11, design: .monospaced)).foregroundStyle(MuseTheme.secondary).textSelection(.enabled)
             }
             ScrollView(.vertical) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(ApprovalDescription.summary(request))
-                        .font(.system(size: 12, design: .monospaced)).textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    DisclosureGroup("Complete permission details") {
-                        Text(request["subject"].prettyPrinted).font(.system(size: 11, design: .monospaced)).textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }.font(.system(size: 11)).foregroundStyle(MuseTheme.secondary)
-                }
+                Text(ApprovalDescription.summary(request))
+                    .font(.system(size: 12, design: .monospaced)).textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }.frame(maxHeight: 112)
+            DisclosureGroup("Complete permission details") {
+                Text(request["subject"].prettyPrinted).font(.system(size: 11, design: .monospaced)).textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }.font(.system(size: 11)).foregroundStyle(MuseTheme.secondary)
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 8) { choices }
                 VStack(alignment: .leading, spacing: 8) { choices }
