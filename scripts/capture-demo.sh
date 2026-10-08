@@ -83,7 +83,7 @@ click() { "$drive_bin" click "$app_pid" "$1" "$2"; sleep 0.6; }
 geom() { read -r WIN_ID WIN_X WIN_Y WIN_W WIN_H <<< "$( { "$drive_bin" window "$app_pid" || true; } | tr ',' ' ')"; }
 
 CX=$((WIN_X + 249 + (WIN_W - 249) / 2))            # composer horizontal center
-CY=$((WIN_Y + WIN_H - 55))                        # composer vertical center
+CY=$((WIN_Y + WIN_H - 115))                       # composer text area (bottom strip is a toolbar, not focusable)
 
 echo "--- beat: workspace at rest"
 shot 01-workspace
@@ -150,7 +150,7 @@ shot 12-resolved
 if ! kill -0 "$app_pid" 2>/dev/null; then echo "App terminated unexpectedly during the regression" >&2; exit 1; fi
 
 echo "--- beat: question card"
-click $((WIN_X + 249 + (WIN_W - 249) / 2)) $((WIN_Y + WIN_H - 45))
+click $((WIN_X + 249 + (WIN_W - 249) / 2)) $((WIN_Y + WIN_H - 115))
 type "please present the question fixture"
 key 36 command
 sleep 2
