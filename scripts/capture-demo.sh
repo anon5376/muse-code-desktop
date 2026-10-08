@@ -95,17 +95,13 @@ key 36 command
 sleep 3
 shot 03-markdown
 
-echo "--- beat: new session -> 40-line approval card"
-# A fresh session restores the suggestion cards: card click sets the draft and
-# focuses the composer, then Cmd-A + type swaps in the fixture prompt.
-key 45 command
+echo "--- beat: 40-line approval card"
+# Selecting the session from the sidebar focuses its composer; the send button
+# is a real hit target, unlike Cmd-Return whose binding depends on responder.
+click $((WIN_X + 150)) $((WIN_Y + 264))
 sleep 1.5
-click $((WIN_X + 700)) $((WIN_Y + 265))
-sleep 1
-key 0 command
-sleep 0.3
 type "please present the approval fixture"
-key 36 command
+click $((WIN_X + WIN_W - 62)) $((WIN_Y + WIN_H - 73))
 sleep 3
 shot 04-approval
 
@@ -157,15 +153,11 @@ sleep 1
 shot 13-resolved
 if ! kill -0 "$app_pid" 2>/dev/null; then echo "App terminated unexpectedly during the regression" >&2; exit 1; fi
 
-echo "--- beat: question card in a fresh session"
-key 45 command
+echo "--- beat: question card"
+click $((WIN_X + 150)) $((WIN_Y + 264))
 sleep 1.5
-click $((WIN_X + 600)) $((WIN_Y + 240))
-sleep 1
-key 0 command
-sleep 0.3
 type "please present the question fixture"
-key 36 command
+click $((WIN_X + WIN_W - 62)) $((WIN_Y + WIN_H - 73))
 sleep 2
 shot 14-question
 # First option row, then the card's Send/answer control.
