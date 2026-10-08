@@ -105,6 +105,15 @@ click $((WIN_X + WIN_W - 55)) $((WIN_Y + WIN_H - 60))
 key 36 command
 sleep 3
 shot 04-approval
+if same_frame 03-markdown 04-approval; then
+    click $((WIN_X + 150)) $((WIN_Y + 264))
+    sleep 2
+    type "please present the approval fixture"
+    click $((WIN_X + WIN_W - 55)) $((WIN_Y + WIN_H - 60))
+    key 36 command
+    sleep 3
+    shot 04-approval
+fi
 
 echo "--- beat: command palette -> synthetic skill chip"
 key 40 command
@@ -162,6 +171,15 @@ click $((WIN_X + WIN_W - 55)) $((WIN_Y + WIN_H - 60))
 key 36 command
 sleep 2
 shot 14-question
+if same_frame 13-resolved 14-question; then
+    click $((WIN_X + 150)) $((WIN_Y + 264))
+    sleep 2
+    type "please present the question fixture"
+    click $((WIN_X + WIN_W - 55)) $((WIN_Y + WIN_H - 60))
+    key 36 command
+    sleep 2
+    shot 14-question
+fi
 # First option row, then the card's Send/answer control.
 click $((WIN_X + 300)) $((WIN_Y + WIN_H - 210))
 sleep 0.5
