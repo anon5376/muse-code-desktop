@@ -1,3 +1,5 @@
+// Transcript state: an ordered, deduplicated, replay-resistant fold of
+// item/* notifications and streaming deltas into renderable items.
 import Foundation
 
 /// One row of the conversation as the host describes it. The raw JSON is

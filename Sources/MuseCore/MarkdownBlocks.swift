@@ -1,3 +1,5 @@
+// Structural Markdown splitter feeding the transcript renderer — block
+// boundaries only; inline markup is left to the view.
 import Foundation
 
 // A bounded native presentation parser, not an HTML renderer. Inline syntax

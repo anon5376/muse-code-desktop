@@ -1,3 +1,5 @@
+// The supervised `muse serve` subprocess: spawn, stdio framing, the
+// initialize/session handshake, request dispatch, and event delivery.
 import Foundation
 import Darwin
 

@@ -1,3 +1,5 @@
+// Offline round-trip diagnostic: handshake → session → streamed echo reply
+// → completed turn → shutdown against the installed CLI. No provider calls.
 import Foundation
 
 /// Result of one offline handshake against the host: server version,
