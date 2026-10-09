@@ -2,6 +2,9 @@ import SwiftUI
 import AppKit
 import MuseCore
 
+/// The workspace root: session sidebar + transcript + request dock +
+/// composer + inspector, laid out by GeometryReader so the inspector sits
+/// beside the conversation when ≥560pt remain and overlays it below that.
 struct WorkspaceView: View {
     @ObservedObject var store: WorkspaceStore
     @FocusState private var composerFocused: Bool
