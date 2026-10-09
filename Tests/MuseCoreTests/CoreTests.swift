@@ -34,12 +34,8 @@ enum CoreTests {
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
             ("JSONValue accessors stay total and bounds-checked", testJSONValueAccessors),
-<<<<<<< HEAD
             ("status labels map known wires and humanize unknown camelCase", testActivityStatusLabels),
-||||||| parent of 2945945 (Test command-id wire format)
-=======
             ("command ids carry the UUIDv7 shape and stay unique", testCommandIDFormat),
->>>>>>> 2945945 (Test command-id wire format)
             ("Markdown edges: tilde fences, indents, quotes, rules", testMarkdownEdges)
         ]
         var failures = 0
@@ -402,8 +398,7 @@ enum CoreTests {
         try equal(ActivityStatus.label("paused"), "Paused")
     }
 
-||||||| parent of 2945945 (Test command-id wire format)
-=======
+
     static func testCommandIDFormat() throws {
         // 8-4-4-4-12 layout with version nibble 7 and variant in 8..b —
         // the shape hosts pattern-match for turn/response correlation.
@@ -423,7 +418,7 @@ enum CoreTests {
         }
     }
 
->>>>>>> 2945945 (Test command-id wire format)
+
     static func testJSONValueAccessors() throws {
         // Subscripting a non-object and missing keys both stay `.null` —
         // chained lookups on hostile payloads must never crash.
