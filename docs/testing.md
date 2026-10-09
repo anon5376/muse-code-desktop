@@ -10,6 +10,9 @@ directly — fast, dependency-free, and identical between local Macs and CI.
 | Core tests | `Tests/MuseCoreTests/CoreTests.swift` | `MuseReviewHost` (synthetic JSON-RPC host) | `bash scripts/test.sh` |
 | Workspace store | `Tests/MuseDesktopTests/StoreTests.swift` | `MuseModelHost` | `bash scripts/test-workspace.sh` |
 
+`swift run MuseDiagnostics [path-to-muse]` is a separate runnable check — an
+echo round trip against the *real* installed CLI, not a suite.
+
 `scripts/test.sh` builds `MuseCoreTests` via SwiftPM, compiles `ReviewHost.swift`
 into `.build/debug/MuseReviewHost`, then runs both suites. `swift-local.sh`
 keeps compiler caches inside `.build/`.
