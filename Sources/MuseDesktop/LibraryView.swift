@@ -1,6 +1,9 @@
 import SwiftUI
 import MuseCore
 
+/// The ⌘K palette: session-catalog skills and commands, bounded to
+/// 560×420 over the reading region. Rows are keyed by entry id — an index
+/// key recycled stale actions under filtering.
 struct CommandPaletteView: View {
     @ObservedObject var store: WorkspaceStore
     @State private var query = ""
@@ -85,6 +88,9 @@ struct CommandPaletteView: View {
     }
 }
 
+/// Skills tab of the inspector: searchable catalog with per-skill detail
+/// disclosure. Uses explicit expand state + chevron button, not a
+/// custom-label DisclosureGroup (dead pointer hit-path on macOS 26).
 struct SkillsInspectorView: View {
     @ObservedObject var store: WorkspaceStore
     @State private var query = ""
@@ -143,6 +149,7 @@ struct SkillsInspectorView: View {
     }
 }
 
+/// Goal tab: set/pause/resume/clear the session goal via host controls.
 struct GoalControlsView: View {
     @ObservedObject var store: WorkspaceStore
     @State private var objective = ""
@@ -170,6 +177,7 @@ struct GoalControlsView: View {
     }
 }
 
+/// Session tab: rename, fork, compact, and arbitrary host commands.
 struct SessionControlsView: View {
     @ObservedObject var store: WorkspaceStore
     @State private var name = ""
@@ -218,6 +226,8 @@ struct SessionControlsView: View {
     }
 }
 
+/// Extensions tab: lists host-reported extensions; management stays in
+/// the CLI (Open Muse in Terminal).
 struct ExtensionsInspectorView: View {
     @ObservedObject var store: WorkspaceStore
     var body: some View {
@@ -239,6 +249,8 @@ struct ExtensionsInspectorView: View {
     }
 }
 
+/// Activity tab: non-message transcript items (tool calls, reasoning
+/// excluded from chat rows) as interactive rows.
 struct ActivityInspectorView: View {
     @ObservedObject var store: WorkspaceStore
     private var items: [TranscriptItem] { (store.current?.transcript.items ?? []).filter { !["userMessage", "agentMessage", "reasoning"].contains($0.kind) } }
@@ -257,6 +269,8 @@ struct ActivityInspectorView: View {
     }
 }
 
+/// One tool-activity row with its destructive/host actions gated behind
+/// an explicit confirm state.
 struct ToolActivityRow: View {
     let item: TranscriptItem
     @ObservedObject var store: WorkspaceStore
