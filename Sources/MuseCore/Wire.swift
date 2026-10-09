@@ -1,3 +1,6 @@
+// Wire primitives shared by the whole protocol layer: JSONValue (total
+// accessors, never throws), LineFramer (newline-delimited, 8 MiB cap), and
+// CommandID generation for turn/response correlation.
 import Foundation
 
 /// Untyped JSON payload for the `muse serve` wire protocol.

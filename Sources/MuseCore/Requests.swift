@@ -1,3 +1,5 @@
+// Request/response contracts: session-history decoding, the question-answer
+// payload rules, permission-request summaries, and status-label mapping.
 import Foundation
 
 /// Decodes `session/history` responses: flat `items`, versioned `snapshot`,
