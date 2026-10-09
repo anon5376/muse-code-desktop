@@ -124,6 +124,16 @@ Poke at the whole UI offline — real `muse` echo provider, no model calls, work
 open "build/Muse Code.app" --args --echo --workspace "$PWD"
 ```
 
+## ✦ Troubleshooting
+
+- **"App is damaged" / unidentified developer** — expected: the DMG is ad-hoc
+  signed, not notarized. Right-click → Open once, or
+  `xattr -dr com.apple.quarantine "/Applications/Muse Code.app"`.
+- **"Muse CLI not found"** — install Muse Code first, or point the app at the
+  binary in Settings. The app never bundles the CLI.
+- **Want to poke around without an account?** Run the app with `--echo` (see
+  Build & verify) — it drives a real offline echo session.
+
 ## ✦ Honest limits
 
 - Ad-hoc signature only — no Developer ID, no notarization; the Gatekeeper step above is required.
