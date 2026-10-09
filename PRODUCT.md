@@ -31,6 +31,8 @@ Use the name Muse Code. The user requested the Muse/Meta charcoal and blue palet
 ## Evidence on Hand
 An actual isolated echo-provider round trip completed through the installed host on 2026-10-08 local time. The CLI's embedded stable schema was exported offline. No model benchmark, real-provider turn, or native-versus-terminal performance comparison has been established.
 
+Executed checks and their limits are recorded in [docs/verification.md](docs/verification.md); unrun acceptance stays open in [docs/acceptance.md](docs/acceptance.md).
+
 ## Product Principles
 - Render structured protocol events directly.
 - Keep credentials in Muse's existing storage.
