@@ -36,7 +36,8 @@ enum CoreTests {
             ("JSONValue accessors stay total and bounds-checked", testJSONValueAccessors),
             ("status labels map known wires and humanize unknown camelCase", testActivityStatusLabels),
             ("command ids carry the UUIDv7 shape and stay unique", testCommandIDFormat),
-            ("Markdown edges: tilde fences, indents, quotes, rules", testMarkdownEdges)
+            ("Markdown edges: tilde fences, indents, quotes, rules", testMarkdownEdges),
+            ("streaming marks only the unterminated tail as partial", testMarkdownStreamingPartial)
         ]
         var failures = 0
         for (name, test) in tests {
@@ -356,6 +357,25 @@ enum CoreTests {
             .code(language: "swift", text: "print(\"hello\")"), .rule
         ])
         try equal(MarkdownBlocks.parse("````text\n``` is content\n````"), [.code(language: "text", text: "``` is content")])
+    }
+
+    static func testMarkdownStreamingPartial() throws {
+        // While streaming, an unterminated tail is `.partial`; finished
+        // lines above it stay stable blocks.
+        let live = MarkdownBlocks.parse("# Title\n\nbody text", isStreaming: true)
+        try equal(live.count, 2)
+        try equal(live[0], .heading(level: 1, text: "Title"))
+        guard case .partial = live[1] else {
+            throw Failure(description: "trailing text was not marked partial: \(live)")
+        }
+        // A trailing newline terminates the last block even mid-stream.
+        let settled = MarkdownBlocks.parse("# Title\n\nbody text\n", isStreaming: true)
+        guard case .paragraph = settled.last else {
+            throw Failure(description: "newline-terminated text was partial: \(settled)")
+        }
+        // Without streaming the same input is already stable.
+        let done = MarkdownBlocks.parse("body text")
+        try equal(done, [.paragraph("body text")])
     }
 
     static func testMarkdownEdges() throws {
