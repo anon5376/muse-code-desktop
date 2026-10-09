@@ -7,6 +7,9 @@
 | [testing.md](testing.md) | Test layout, fixtures, conventions, and CI mapping |
 | [architecture.md](architecture.md) | Two-layer structure and per-file responsibilities |
 | [fixtures.md](fixtures.md) | ReviewHost/ModelHost synthetic host contracts |
+| [protocol.md](protocol.md) | JSON-RPC surface the app implements, by direction |
+| [compatibility.md](compatibility.md) | Platform, CLI, and toolchain requirements |
+| [releasing.md](releasing.md) | Tag-driven release runbook and re-release procedure |
 | [uiux-review.md](uiux-review.md) | Interactive UI/UX review from a real macOS session |
 | [review.md](review.md) | Code/visual reviewer dispositions for the v0.1.0 candidate |
 | [claude-review-response.md](claude-review-response.md) | Disposition of the user-supplied external review |
