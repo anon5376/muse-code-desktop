@@ -12,6 +12,9 @@ Scripted presentation fixture used by `scripts/test.sh` and CI:
 - handshake → session lifecycle
 - emits approval (`approval`) and question (`question`) cards for the
   permission-presentation and native-UI checks
+- counts presentation receipts and user decisions, exposed via the
+  `fixture/status` request — so a test can assert a card was *shown*
+  (`receipts`) versus *answered* (`decisions`)
 
 ## ModelHost (`Tests/MuseDesktopTests/ModelHost.swift`)
 
