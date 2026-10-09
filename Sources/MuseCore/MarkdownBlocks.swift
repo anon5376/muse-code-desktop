@@ -2,13 +2,26 @@ import Foundation
 
 // A bounded native presentation parser, not an HTML renderer. Inline syntax
 // remains Foundation's job; these blocks supply the missing desktop layout.
+/// A single rendered unit of assistant markdown.
+///
+/// The transcript renders a list of blocks top-to-bottom; `.partial` marks a
+/// trailing block that is still being streamed and may grow with the next delta.
 public enum MarkdownBlock: Equatable, Sendable {
     case paragraph(String), partial(String), heading(level: Int, text: String)
     case listItem(marker: String, text: String, indent: Int), quote(String)
     case code(language: String, text: String), table(headers: [String], rows: [[String]]), rule
 }
 
+/// Line-oriented Markdown splitter for transcript text.
+///
+/// This is deliberately a structural splitter, not a full Markdown parser: it
+/// recognizes the block shapes the assistant actually emits (headings, ` ``` `
+/// and `~~~` fences, lists, quotes, tables, rules) and leaves inline markup
+/// untouched.
 public enum MarkdownBlocks {
+    /// Splits `text` into blocks. With `isStreaming`, an unterminated trailing
+    /// region (no final newline) becomes `.partial` instead of a stable block,
+    /// so completed blocks stay stable while the tail keeps updating.
     public static func parse(_ text: String, isStreaming: Bool = false) -> [MarkdownBlock] {
         let lines = text.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n")
         var blocks: [MarkdownBlock] = [], index = 0
