@@ -64,8 +64,9 @@ hdiutil create -volname "Muse Code $version" \
 # 6. Verify: mount, check contents, detach — leaves the source tree untouched.
 mount_point="$(mktemp -d /tmp/muse-dmg-XXXXXX)"
 cleanup_mount() {
-    hdiutil detach "$mount_point" -force -quiet 2>/dev/null || true
-    rm -rf "$mount_point" "$stage_dir"
+    [[ -n "${mount_point:-}" ]] && hdiutil detach "$mount_point" "$mount_point" -force -quiet 2>/dev/null || true
+    rm -rf "$stage_dir"
+    [[ -n "${mount_point:-}" ]] && rmdir "$mount_point" 2>/dev/null || true
 }
 trap cleanup_mount EXIT
 hdiutil attach "$dmg_path" -mountpoint "$mount_point" -nobrowse -readonly
