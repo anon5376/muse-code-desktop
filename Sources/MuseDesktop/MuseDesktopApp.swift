@@ -1,3 +1,4 @@
+// App entry point: single-window policy, lifecycle delegate, menu wiring.
 import SwiftUI
 import AppKit
 
