@@ -1,3 +1,5 @@
+// Settings: host path, diagnostics, and the self-test that reports what it
+// actually verified (never a fake success).
 import SwiftUI
 import AppKit
 import MuseCore

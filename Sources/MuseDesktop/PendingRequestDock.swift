@@ -1,3 +1,4 @@
+// Pending-request dock: approvals and questions paged above the composer.
 import SwiftUI
 
 /// Dock above the composer holding every pending approval/question.

@@ -1,3 +1,5 @@
+// Model picker: actual catalog routes with provider/profile grouping,
+// reasoning choices, and honest data-use notices.
 import SwiftUI
 
 /// The model control in the composer: a native popover (380×500) listing

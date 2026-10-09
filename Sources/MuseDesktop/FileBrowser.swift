@@ -1,3 +1,5 @@
+// FileBrowser: workspace file tree for the Files inspector — hidden files,
+// symlinks, and heavy dependency dirs excluded by policy.
 import Foundation
 
 /// A node in the workspace file tree (directory or file, lazily loaded).
