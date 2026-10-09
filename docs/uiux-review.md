@@ -2,7 +2,11 @@
 
 **Date:** 2026-10-07 · **Branch:** `devin/v010-release` (HEAD d04d4ea) · **Build:** debug via `scripts/swift-local.sh` + `scripts/build-app.sh`
 **Mode:** `--echo` + `MuseReviewHost` fixture, workspace `/Users/devin/muse-fixture-ws`. No real provider was contacted; all transcript content below is synthetic fixture output.
-**Method:** manual GUI driving (mouse clicks, typing, keyboard shortcuts, window resize) + accessibility tree + source tracing. Screenshots in `docs/review-shots/`.
+**Method:** manual GUI driving (mouse clicks, typing, keyboard shortcuts, window resize) + accessibility tree + source tracing. Screenshots in `docs/media/` (cropped to window bounds).
+
+> **Status:** all findings below were fixed and shipped in
+> [v0.1.0](https://github.com/anon5376/muse-code-desktop/releases/tag/v0.1.0)
+> (squash `ac3099c`). The report is preserved as written.
 
 ## Findings
 
