@@ -198,7 +198,9 @@ enum StoreTests {
                     fixtureStore.draft = "delayed terminal failure"; fixtureStore.send()
                     try await waitUntil { !fixtureStore.isBusy }
                     fixtureStore.selectSession(firstID)
-                    try await Task.sleep(for: .milliseconds(350))
+                    // Poll for the delayed failure rather than a fixed sleep: the
+                    // host posts it asynchronously and a fixed 350 ms raced it in CI.
+                    try await waitUntil { second.errorMessage != nil }
                     let backgroundRetained = second.errorMessage == "Synthetic delayed failure" && fixtureStore.errorMessage == nil
                     fixtureStore.selectSession(secondID)
                     if backgroundRetained, fixtureStore.errorMessage == "Synthetic delayed failure" {
