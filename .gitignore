@@ -12,3 +12,11 @@ docs/claude-design-brief.md
 *.log
 xcuserdata/
 *.xcuserstate
+
+# Editor/OS cruft
+.idea/
+.vscode/
+*.swp
+*.orig
+*.rej
+DerivedData/
