@@ -1,5 +1,10 @@
 import Foundation
 
+/// Untyped JSON payload for the `muse serve` wire protocol.
+///
+/// The schema fingerprint guards the whole envelope, so payload fields are
+/// read defensively: missing keys yield `.null` via `subscript`, and the
+/// typed accessors degrade to nil/empty instead of throwing.
 public enum JSONValue: Codable, Equatable, Sendable {
     case object([String: JSONValue]), array([JSONValue]), string(String)
     case number(Double), bool(Bool), null
@@ -36,6 +41,7 @@ public enum JSONValue: Codable, Equatable, Sendable {
     public var array: [JSONValue] { if case .array(let v) = self { return v }; return [] }
     public var object: [String: JSONValue] { if case .object(let v) = self { return v }; return [:] }
 
+    /// Sorted-key pretty print for diagnostics and the permission-details disclosure.
     public var prettyPrinted: String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
@@ -43,6 +49,11 @@ public enum JSONValue: Codable, Equatable, Sendable {
     }
 }
 
+/// Splits `muse serve` stdout bytes into newline-delimited frames.
+///
+/// `\r\n` is normalized to `\n`, empty frames are dropped, and a frame
+/// longer than `maximumFrameBytes` (8 MiB default) fails fast instead of
+/// growing the buffer without bound.
 public struct LineFramer {
     public enum Failure: Error { case frameTooLarge }
     public let maximumFrameBytes: Int
