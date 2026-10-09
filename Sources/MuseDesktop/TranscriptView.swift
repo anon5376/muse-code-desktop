@@ -2,6 +2,9 @@ import SwiftUI
 import AppKit
 import MuseCore
 
+/// The scrollable conversation: transcript rows, activity rows, and the
+/// pinned request cards above the composer. Uses an eager VStack — lazy
+/// measurement looped on compact layouts with the request dock visible.
 struct TranscriptView: View {
     @ObservedObject var store: WorkspaceStore
     @State private var followOutput = true
@@ -40,6 +43,8 @@ struct TranscriptView: View {
     }
 }
 
+/// A user/agent/tool row. `Equatable` on the item so SwiftUI only
+/// re-renders rows whose content actually changed.
 struct TranscriptRow: View, Equatable {
     let item: TranscriptItem
     static func == (lhs: Self, rhs: Self) -> Bool { lhs.item == rhs.item }
@@ -80,6 +85,9 @@ struct TranscriptRow: View, Equatable {
     }
 }
 
+/// Collapsible tool-activity row; details expand inline via a chevron
+/// button (the custom-label DisclosureGroup hit-path is unreliable on
+/// macOS 26).
 struct ActivityRow: View {
     let item: TranscriptItem
     @State private var expanded = false
@@ -120,6 +128,9 @@ struct ActivityRow: View {
     private var statusSymbol: String { item.status == "failed" ? "exclamationmark.circle" : item.isActive ? "circle.dotted" : item.status == "completed" ? "checkmark" : "minus.circle" }
 }
 
+/// Pending permission request pinned above the composer. Shows the real
+/// subject (command, cwd, protected-write flag, network targets); choices
+/// stay visible while long content scrolls. Never auto-decides.
 struct ApprovalCard: View {
     let request: JSONValue
     @ObservedObject var store: WorkspaceStore
@@ -166,6 +177,8 @@ struct ApprovalCard: View {
     }
 }
 
+/// Pending userInput question. Selections/free text are validated against
+/// the host's own options and bounds before the answer can be sent.
 struct QuestionCard: View {
     let request: JSONValue
     @ObservedObject var store: WorkspaceStore
