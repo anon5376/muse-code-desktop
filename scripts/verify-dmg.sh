@@ -1,4 +1,8 @@
 #!/bin/bash
+# Verifies a packaged DMG end to end: mounts it, copies the app to a temp dir,
+# launches the copy, and checks the app presents a window (then exits on its
+# own when the supervised host is absent or synthetic).
+# Usage: bash scripts/verify-dmg.sh [dmg-path]   (defaults to newest build/*.dmg)
 # Verifies the packaged DMG beyond packaging-time checks:
 #   1. Mount read-only, confirm bundle + Applications link, detach cleanly.
 #   2. Copy the app to a different location and launch it against the
