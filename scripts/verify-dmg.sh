@@ -10,8 +10,10 @@ set -euo pipefail
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$project_root"
 
-dmg_path="$(ls "$project_root"/build/dist/muse-code-desktop-*.dmg | head -1)"
+dmg_path="$(ls -t "$project_root"/build/dist/muse-code-desktop-*.dmg | head -1)"
 verify_dir="$project_root/build/verify"
+mount_point=""
+install_dir=""
 rm -rf "$verify_dir"; mkdir -p "$verify_dir"
 drive_bin="$verify_dir/demo-drive"
 host_bin="$verify_dir/MuseReviewHost"
@@ -41,7 +43,11 @@ fixture_ws="$verify_dir/workspace"; mkdir -p "$fixture_ws"
 echo "# disposable" > "$fixture_ws/README.md"
 
 pids=()
-cleanup() { for p in "${pids[@]:-}"; do kill "$p" 2>/dev/null || true; done; }
+cleanup() {
+    for p in "${pids[@]:-}"; do kill "$p" 2>/dev/null || true; done
+    [[ -n "$mount_point" ]] && hdiutil detach "$mount_point" -force -quiet 2>/dev/null || true
+    [[ -n "$mount_point$install_dir" ]] && rm -rf "$mount_point" "$install_dir" || true
+}
 trap cleanup EXIT
 
 echo "--- launch copied app against ReviewHost fixture"
