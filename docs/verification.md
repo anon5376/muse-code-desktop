@@ -1,5 +1,11 @@
 # Verification evidence
 
+> **Post-ship note (2026-10-08):** this evidence supported the published
+> [v0.1.0 prerelease](https://github.com/anon5376/muse-code-desktop/releases/tag/v0.1.0).
+> The same checks now run per-PR and per-tag on `macos-15` via
+> [.github/workflows/build.yml](../.github/workflows/build.yml). Everything
+> below describes the pre-release local verification and remains accurate.
+
 Executed on 2026-10-08 local time: macOS 26.4, Apple Silicon, Swift 6.3.1 command-line tools, Muse Code 1.4.2-R4684.1. This supports a local user-test candidate. Live-provider acceptance and user design approval remain open.
 
 ## Executed checks
