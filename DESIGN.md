@@ -63,6 +63,15 @@ components:
 
 # Design System: Muse Code Desktop
 
+## Contents
+
+- [Overview](#overview)
+- [Colors](#colors) — primary · secondary · neutral
+- [Typography](#typography) — hierarchy
+- [Layout](#layout) · [Elevation & Depth](#elevation--depth) · [Shapes](#shapes)
+- [Components](#components) — buttons · inputs · navigation · transcript · model picker · inspector · app icon
+- [Do's and Don'ts](#dos-and-donts)
+
 ## Overview
 
 **Creative North Star: "Signal Desk"**
