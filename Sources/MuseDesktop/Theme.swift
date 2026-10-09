@@ -1,6 +1,11 @@
 import SwiftUI
 import AppKit
 
+/// Design tokens for the flat charcoal workspace ("Signal Desk").
+///
+/// Filled native controls draw with light labels supplied by macOS, so they
+/// use the deeper `controlAccent` instead of `accent`. Semantic colors beyond
+/// this palette should not appear without a DESIGN.md entry.
 enum MuseTheme {
     // Muse blue in a neutral native workspace. Filled native controls need a
     // deeper blue because macOS supplies light labels for those controls.
@@ -22,11 +27,14 @@ enum MuseTheme {
 }
 
 extension Color {
+    /// Opaque sRGB color from a packed 0xRRGGBB literal.
     init(hex: UInt32) {
         self.init(.sRGB, red: Double((hex >> 16) & 255) / 255, green: Double((hex >> 8) & 255) / 255, blue: Double(hex & 255) / 255, opacity: 1)
     }
 }
 
+/// The Muse logo rendered from the bundled SVG at a fixed point size.
+/// The mark is decorative; it is hidden from accessibility.
 struct MuseMark: View {
     var size: CGFloat = 24
     private static let logo: NSImage = {
@@ -45,6 +53,7 @@ struct MuseMark: View {
     }
 }
 
+/// A flat toolbar icon button with hover/selection fill and tooltip.
 struct IconButton: View {
     let symbol: String
     let label: String
@@ -65,6 +74,7 @@ struct IconButton: View {
     }
 }
 
+/// A 1pt divider in `MuseTheme.line`; the only separator the design uses.
 struct Hairline: View {
     var body: some View { Rectangle().fill(MuseTheme.line).frame(height: 1) }
 }
