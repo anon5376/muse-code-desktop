@@ -25,7 +25,8 @@ enum CoreTests {
             ("unavailable resume history cannot become a healthy empty transcript", testUnavailableHistory),
             ("transcript ignores deltas for unknown or inactive items", testTranscriptDeltaEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
-            ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown)
+            ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
+            ("Markdown edges: tilde fences, indents, quotes, rules", testMarkdownEdges)
         ]
         var failures = 0
         for (name, test) in tests {
@@ -299,6 +300,30 @@ enum CoreTests {
             .code(language: "swift", text: "print(\"hello\")"), .rule
         ])
         try equal(MarkdownBlocks.parse("````text\n``` is content\n````"), [.code(language: "text", text: "``` is content")])
+    }
+
+    static func testMarkdownEdges() throws {
+        // Headings require a space after # and levels 1...6 only.
+        try equal(MarkdownBlocks.parse("#tag"), [.paragraph("#tag")])
+        try equal(MarkdownBlocks.parse("####### too deep"), [.paragraph("####### too deep")])
+        try equal(MarkdownBlocks.parse("###### six"), [.heading(level: 6, text: "six")])
+        // Tilde fences are fences too.
+        try equal(MarkdownBlocks.parse("~~~txt\nbody\n~~~"), [.code(language: "txt", text: "body")])
+        // A fence never closed still yields its code (truncation must not drop it).
+        try equal(MarkdownBlocks.parse("```\nunfinished"), [.code(language: "", text: "unfinished")])
+        // List markers: unordered normalize to •, ordered keep their ordinal, indent by 2-space units.
+        try equal(MarkdownBlocks.parse("  - nested\n* star\n3) paren"), [
+            .listItem(marker: "•", text: "nested", indent: 1),
+            .listItem(marker: "•", text: "star", indent: 0),
+            .listItem(marker: "3)", text: "paren", indent: 0)])
+        // Consecutive > lines join into one quote; spaceless and spaced rules both rule.
+        try equal(MarkdownBlocks.parse("> a\n> b"), [.quote("a\nb")])
+        try equal(MarkdownBlocks.parse("- - -\n***\n___"), [.rule, .rule, .rule])
+        // A divider-less pipe line is a paragraph, not a table.
+        try equal(MarkdownBlocks.parse("a | b\nno divider"), [.paragraph("a | b\nno divider")])
+        // Consecutive plain lines join into one paragraph.
+        try equal(MarkdownBlocks.parse("line one\nline two\n\nnext"), [.paragraph("line one\nline two"), .paragraph("next")])
+        try equal(MarkdownBlocks.parse(""), [])
     }
 
     static func testStreamingMarkdown() throws {
