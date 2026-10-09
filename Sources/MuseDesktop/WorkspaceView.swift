@@ -1,3 +1,4 @@
+// Root workspace layout: sidebar navigation, transcript, inspector panes.
 import SwiftUI
 import AppKit
 import MuseCore

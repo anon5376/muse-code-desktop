@@ -1,3 +1,4 @@
+// Theme: the Signal Desk palette tokens and shared flat controls.
 import SwiftUI
 import AppKit
 

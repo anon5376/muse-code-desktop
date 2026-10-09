@@ -1,3 +1,4 @@
+// MarkdownBody: renders MarkdownBlocks for transcript text, streaming-aware.
 import SwiftUI
 import AppKit
 import MuseCore

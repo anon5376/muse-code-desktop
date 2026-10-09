@@ -1,3 +1,5 @@
+// The transcript scroll view: item rendering, approvals/questions inline,
+// streaming updates, and jump controls.
 import SwiftUI
 import AppKit
 import MuseCore

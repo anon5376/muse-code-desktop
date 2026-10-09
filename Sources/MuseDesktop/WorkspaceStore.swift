@@ -1,3 +1,5 @@
+// Per-workspace session state: supervised host lifecycle, transcript,
+// pending requests, drafts, model selection, and file browsing.
 import SwiftUI
 import AppKit
 import MuseCore

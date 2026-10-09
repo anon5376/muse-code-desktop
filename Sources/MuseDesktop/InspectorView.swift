@@ -1,3 +1,4 @@
+// Inspector tabs — Files, Activity, Skills, Session — beside the transcript.
 import SwiftUI
 import AppKit
 

@@ -1,3 +1,5 @@
+// CLICatalog: locates the installed Muse binary and reads its model/skill
+// catalogs — the single seam between the app and the CLI distribution.
 import Foundation
 import MuseCore
 import Darwin

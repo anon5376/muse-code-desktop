@@ -1,3 +1,4 @@
+// Session library and ⌘K palette: list, rename, resume, durable summaries.
 import SwiftUI
 import MuseCore
 
