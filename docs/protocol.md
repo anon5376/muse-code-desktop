@@ -39,6 +39,17 @@ app only relies on what is listed here.
 | `skill/changed` | Live skill catalog updates |
 | `connection/closed` | Host exit/pipe closure |
 
+## Framing, timeouts, and refusals
+
+- One JSON object per line in each direction (`LineFramer`); a frame over
+  8 MiB is a protocol failure, not a truncated message.
+- Requests carry generated UUIDv7-style ids (`CommandID`) so late responses
+  correlate even across session switches.
+- Unacknowledged requests time out (default 30 s) with the user-facing
+  "did not acknowledge … in time" message — never a silent hang.
+- Unknown host→client methods get JSON-RPC `-32601`; unknown notifications
+  are ignored, so a newer host degrades gracefully.
+
 ## Requests the host sends the app
 
 `approval/request` and `userInput/request` are pinned above the composer and
