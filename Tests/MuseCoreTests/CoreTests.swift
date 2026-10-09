@@ -16,6 +16,7 @@ enum CoreTests {
         let tests: [(String, () throws -> Void)] = [
             ("framing preserves split Unicode and separates messages", testFramingPreservesSplitUnicodeAndSeparatesMessages),
             ("frame limit applies to terminated and unterminated frames", testFrameLimitAppliesPerFrameIncludingUnterminatedInput),
+            ("framing normalizes CRLF splits and drops empty frames", testFramingEdgeCases),
             ("final revisions replace deltas and resist replay", testStreamingFoldReplacesFinalRevisionAndIgnoresReplayedInput),
             ("tool output and unknown terminal items remain readable", testToolOutputAndUnknownTerminalItemsRemainReadable),
             ("question answers obey the host's exclusive variants and bounds", testQuestionAnswerContract),
@@ -147,6 +148,18 @@ enum CoreTests {
         try equal(try frames.map { try JSONDecoder().decode(JSONValue.self, from: $0) }, [
             .object(["text": .string("привет 👋")]), .object(["id": .number(2)])
         ])
+    }
+
+    // A \r at the end of one chunk followed by \n at the start of the next
+    // is still one line ending; empty frames carry no messages.
+    static func testFramingEdgeCases() throws {
+        var framer = LineFramer()
+        try equal(try framer.append(Data("alpha\r".utf8)), [])
+        try equal(try framer.append(Data("\n\n\nbeta\n".utf8)), [Data("alpha".utf8), Data("beta".utf8)])
+        // A frame of exactly maximumFrameBytes is accepted.
+        var bounded = LineFramer(maximumFrameBytes: 3)
+        try equal(try bounded.append(Data("abc\n".utf8)), [Data("abc".utf8)])
+        try throwsError { _ = try bounded.append(Data("abcd\n".utf8)) }
     }
 
     // An unterminated or oversized frame must not grow memory without a bound.
