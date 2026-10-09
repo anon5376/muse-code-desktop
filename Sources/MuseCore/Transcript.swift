@@ -1,5 +1,8 @@
 import Foundation
 
+/// One row of the conversation as the host describes it. The raw JSON is
+/// retained so new wire fields stay available; typed accessors supply the
+/// fields the UI actually reads.
 public struct TranscriptItem: Identifiable, Equatable, Sendable {
     public var raw: JSONValue
     public init(_ raw: JSONValue) { self.raw = raw }
@@ -14,6 +17,8 @@ public struct TranscriptItem: Identifiable, Equatable, Sendable {
     public var statusLabel: String { ActivityStatus.label(status) }
 }
 
+/// Maps wire status strings to the labels shown in the transcript and
+/// Activity tab — including a camelCase fallback for statuses not yet known.
 public enum ActivityStatus {
     public static func label(_ raw: String) -> String {
         ["inProgress": "Running", "completed": "Done", "failed": "Failed", "interrupted": "Stopped", "cancelled": "Stopped", "canceled": "Stopped", "notLoaded": "Not loaded"][raw]
@@ -21,6 +26,11 @@ public enum ActivityStatus {
     }
 }
 
+/// Ordered, deduplicated view of `item/*` notifications.
+///
+/// `apply` reduces each notification into an upsert keyed by `itemId`;
+/// deltas are replay-resistant (a per-field cursor ignores already-seen
+/// viewCursors) and later revisions always win.
 public struct Transcript: Equatable, Sendable {
     public private(set) var items: [TranscriptItem] = []
     private var indices: [String: Int] = [:]
