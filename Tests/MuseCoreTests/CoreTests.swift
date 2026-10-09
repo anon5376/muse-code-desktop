@@ -29,6 +29,7 @@ enum CoreTests {
             ("permission summaries expose network targets and file access", testApprovalSubjectDisclosure),
             ("unavailable resume history cannot become a healthy empty transcript", testUnavailableHistory),
             ("transcript ignores deltas for unknown or inactive items", testTranscriptDeltaEdges),
+            ("transcript folds started/updated/completed into one item", testTranscriptUpsertLifecycle),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -214,6 +215,31 @@ enum CoreTests {
 
     // Deltas target live items only: an unstarted itemId, a completed item,
     // and unknown fields/methods are ignored — never resurrected or appended.
+    static func testTranscriptUpsertLifecycle() throws {
+        var transcript = Transcript()
+        func item(_ status: String, _ revision: Int, _ text: String) -> JSONValue {
+            .object(["itemId": .string("it"), "kind": .string("agentMessage"),
+                "status": .string(status), "revision": .number(Double(revision)), "text": .string(text)])
+        }
+        func note(_ method: String, _ params: JSONValue) -> JSONValue {
+            .object(["method": .string(method), "params": params])
+        }
+        // started → updated → completed stay one item; the latest wins.
+        try equal(transcript.apply(note("item/started", .object(["item": item("inProgress", 1, "a")]))), true)
+        try equal(transcript.apply(note("item/updated", .object(["item": item("inProgress", 2, "ab")]))), true)
+        try equal(transcript.items.count, 1)
+        try equal(transcript.apply(note("item/completed", .object(["item": item("completed", 3, "abc")]))), true)
+        try equal(transcript.items.count, 1)
+        try equal(transcript.items[0].status, "completed")
+        try equal(transcript.items[0].raw["text"].string, "abc")
+        // A completed item is inactive: a trailing delta is ignored.
+        try equal(transcript.apply(note("item/delta", .object(["itemId": .string("it"),
+            "delta": .string("late")]))), false)
+        try equal(transcript.items[0].raw["text"].string, "abc")
+        // Unknown methods are not items.
+        try equal(transcript.apply(note("turn/started", .object([:]))), false)
+    }
+
     static func testTranscriptDeltaEdges() throws {
         var transcript = Transcript()
         try equal(transcript.apply(try frame("item/delta", #"{"itemId":"ghost","delta":"x","field":"text"}"#)), false)
