@@ -33,6 +33,7 @@ enum CoreTests {
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
             ("JSONValue accessors stay total and bounds-checked", testJSONValueAccessors),
+            ("status labels map known wires and humanize unknown camelCase", testActivityStatusLabels),
             ("Markdown edges: tilde fences, indents, quotes, rules", testMarkdownEdges)
         ]
         var failures = 0
@@ -352,6 +353,21 @@ enum CoreTests {
         // Consecutive plain lines join into one paragraph.
         try equal(MarkdownBlocks.parse("line one\nline two\n\nnext"), [.paragraph("line one\nline two"), .paragraph("next")])
         try equal(MarkdownBlocks.parse(""), [])
+    }
+
+    static func testActivityStatusLabels() throws {
+        // Every wire status in the map has a stable human label.
+        try equal(ActivityStatus.label("inProgress"), "Running")
+        try equal(ActivityStatus.label("completed"), "Done")
+        try equal(ActivityStatus.label("failed"), "Failed")
+        // The three stop spellings the host has emitted all fold to "Stopped".
+        try equal(ActivityStatus.label("interrupted"), "Stopped")
+        try equal(ActivityStatus.label("cancelled"), "Stopped")
+        try equal(ActivityStatus.label("canceled"), "Stopped")
+        try equal(ActivityStatus.label("notLoaded"), "Not loaded")
+        // Unknown camelCase still renders readably instead of raw wire text.
+        try equal(ActivityStatus.label("inReviewMode"), "In Review Mode")
+        try equal(ActivityStatus.label("paused"), "Paused")
     }
 
     static func testJSONValueAccessors() throws {
