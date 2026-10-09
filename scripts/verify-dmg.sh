@@ -46,7 +46,7 @@ pids=()
 cleanup() {
     for p in "${pids[@]:-}"; do kill "$p" 2>/dev/null || true; done
     [[ -n "$mount_point" ]] && hdiutil detach "$mount_point" -force -quiet 2>/dev/null || true
-    rm -rf "$mount_point" "$install_dir"
+    [[ -n "$mount_point$install_dir" ]] && rm -rf "$mount_point" "$install_dir" || true
 }
 trap cleanup EXIT
 
