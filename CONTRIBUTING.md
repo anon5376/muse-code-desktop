@@ -8,6 +8,13 @@ Small, focused PRs only — one improvement per change.
 - Swift toolchain from Xcode or Command Line Tools (`swift --version`)
 - No third-party dependencies; do not add any without asking first
 
+## Commits and PRs
+
+- Imperative subjects under ~72 characters ("Test …", "Add …", "Document …").
+- PRs merge by squash, so the PR title becomes the permanent history entry —
+  write it accordingly.
+- One improvement per PR; leave unrelated files alone.
+
 ## Build and test
 
 ```sh
