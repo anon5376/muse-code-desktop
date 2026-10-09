@@ -1,5 +1,8 @@
 import SwiftUI
 
+/// The model control in the composer: a native popover (380×500) listing
+/// real catalog routes — provider/profile pairs stay distinct, reasoning
+/// comes from advertised variants, and the data-use notice stays visible.
 struct ModelPickerControl: View {
     @ObservedObject var store: WorkspaceStore
     @State private var presented = false
