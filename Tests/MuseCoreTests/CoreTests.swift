@@ -21,6 +21,7 @@ enum CoreTests {
             ("question answers obey the host's exclusive variants and bounds", testQuestionAnswerContract),
             ("permission summaries expose network targets and file access", testApprovalSubjectDisclosure),
             ("unavailable resume history cannot become a healthy empty transcript", testUnavailableHistory),
+            ("transcript ignores deltas for unknown or inactive items", testTranscriptDeltaEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown)
         ]
@@ -186,6 +187,28 @@ enum CoreTests {
         transcript.apply(try frame("item/completed", #"{"item":{"itemId":"x","kind":"futureKind","revision":1,"status":"futureTerminal","fallbackText":"New host activity"}}"#))
         try equal(transcript.items.last?.text, "New host activity")
         try equal(transcript.items.last?.isActive, false)
+    }
+
+    // Deltas target live items only: an unstarted itemId, a completed item,
+    // and unknown fields/methods are ignored — never resurrected or appended.
+    static func testTranscriptDeltaEdges() throws {
+        var transcript = Transcript()
+        try equal(transcript.apply(try frame("item/delta", #"{"itemId":"ghost","delta":"x","field":"text"}"#)), false)
+        try equal(transcript.items.isEmpty, true)
+        try equal(transcript.apply(try frame("session/updated", #"{"sessionId":"s"}"#)), false)
+        try equal(transcript.apply(try frame("item/started", #"{"item":{"itemId":"a","kind":"agentMessage","revision":1,"status":"inProgress","text":""}}"#)), true)
+        // A delta to an unknown field is dropped; a missing field defaults to text.
+        try equal(transcript.apply(try frame("item/delta", #"{"itemId":"a","delta":"bad","field":"futureField"}"#)), false)
+        try equal(transcript.apply(try frame("item/delta", #"{"itemId":"a","delta":"Hel"}"#)), true)
+        try equal(transcript.items.first?.text, "Hel")
+        // Completing the item clears its delta cursors, so a later turn may
+        // legitimately reuse viewCursors — but deltas still need an active item.
+        try equal(transcript.apply(try frame("item/completed", #"{"item":{"itemId":"a","kind":"agentMessage","revision":2,"status":"completed","text":"Hello"}}"#)), true)
+        try equal(transcript.apply(try frame("item/delta", #"{"itemId":"a","delta":"late","field":"text"}"#)), false)
+        try equal(transcript.items.first?.text, "Hello")
+        // Equal-revision updates are ignored; only strictly newer revisions upsert.
+        try equal(transcript.apply(try frame("item/updated", #"{"item":{"itemId":"a","kind":"agentMessage","revision":2,"status":"failed","text":"stale"}}"#)), false)
+        try equal(transcript.items.first?.status, "completed")
     }
 
     private static func frame(_ method: String, _ params: String) throws -> JSONValue {
