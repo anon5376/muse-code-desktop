@@ -7,6 +7,12 @@ name: demo-media
 on:
   workflow_dispatch:
 
+# One capture at a time — two concurrent runs would both drive UI and
+# produce ambiguous evidence for review.
+concurrency:
+  group: demo-media
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
