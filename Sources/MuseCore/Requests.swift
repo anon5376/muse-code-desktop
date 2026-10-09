@@ -1,5 +1,8 @@
 import Foundation
 
+/// Decodes `session/history` responses: flat `items`, versioned `snapshot`,
+/// or an explicit unavailable `mode` — each failure is a protocol error, not
+/// silently an empty transcript.
 public enum SessionHistory {
     public static func items(_ history: JSONValue) throws -> [JSONValue] {
         if history["mode"].string == "none" {
@@ -14,6 +17,9 @@ public enum SessionHistory {
     }
 }
 
+/// Builds a `userInput/answer` payload that obeys the host's own question
+/// contract: option labels must come from the offered set, counts and bounds
+/// are checked client-side, and free text is capped at 500 scalars.
 public enum UserInputAnswer {
     public static func make(question: JSONValue, selections: [String], freeText: String) -> JSONValue? {
         guard let id = question["id"].string, !id.isEmpty else { return nil }
@@ -35,6 +41,9 @@ public enum UserInputAnswer {
     }
 }
 
+/// Renders a permission request into the one-line summary shown on the
+/// approval card, exposing network targets and file access rather than a
+/// generic command label.
 public enum ApprovalDescription {
     public static func summary(_ request: JSONValue) -> String {
         let subject = request["subject"]
