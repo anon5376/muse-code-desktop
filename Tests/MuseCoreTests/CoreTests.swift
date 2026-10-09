@@ -327,6 +327,29 @@ enum CoreTests {
         try equal(MarkdownBlocks.parse(""), [])
     }
 
+    static func testJSONValueAccessors() throws {
+        // Subscripting a non-object and missing keys both stay `.null` —
+        // chained lookups on hostile payloads must never crash.
+        try equal(JSONValue.string("x")["key"], .null)
+        try equal(JSONValue.object(["a": .string("b")])["a"], .string("b"))
+        try equal(JSONValue.object(["a": .string("b")])["missing"], .null)
+        // Mismatched-type accessors yield nil or the empty collection.
+        try equal(JSONValue.number(1).string, nil)
+        try equal(JSONValue.string("x").bool, nil)
+        try equal(JSONValue.string("x").array, [])
+        try equal(JSONValue.array([]).object, [:])
+        // `int` accepts finite in-range numbers and truncates fractions,
+        // rejects NaN/inf and values outside Int's range.
+        try equal(JSONValue.number(2.9).int, 2)
+        try equal(JSONValue.number(-7).int, -7)
+        try equal(JSONValue.number(.nan).int, nil)
+        try equal(JSONValue.number(.infinity).int, nil)
+        try equal(JSONValue.number(1e30).int, nil)
+        try equal(JSONValue.number(-1e30).int, nil)
+        try equal(JSONValue.bool(true).bool, true)
+        try equal(JSONValue.null.bool, nil)
+    }
+
     static func testStreamingMarkdown() throws {
         let prefix = "## Finished heading\n\nParagraph finished.\n\n"
         let stable = MarkdownBlocks.parse(prefix)
