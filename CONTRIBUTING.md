@@ -43,6 +43,7 @@ never touch a provider, model, or real tools. Keep it that way.
 - Don't invent host state, model metadata, or permission grants in the UI
 - Scripts are `bash` with `set -euo pipefail`; keep caches inside `.build/`
 - Run `bash scripts/test.sh` before pushing; CI runs the same on `macos-15`
+  (workflow map: [docs/ci.md](docs/ci.md))
 
 ## Honest claims
 
