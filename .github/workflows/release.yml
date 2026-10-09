@@ -38,9 +38,12 @@ jobs:
           fi
           shopt -s nullglob
           assets=( build/dist/muse-code-desktop-*.dmg build/dist/muse-code-desktop-*.sha256 )
+          # --clobber makes a re-run idempotent: a failed release job that
+          # already uploaded assets can be retried without manual cleanup.
           gh release create "$TAG" \
             --repo "${{ github.repository }}" \
             --title "Muse Code Desktop ${TAG}" \
             --prerelease \
             --notes-file "$notes" \
+            --clobber \
             "${assets[@]}"
