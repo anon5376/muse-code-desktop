@@ -114,6 +114,7 @@ bash scripts/build-app.sh      # build/Muse Code.app, ad-hoc signed
 bash scripts/test.sh           # core + workspace suites
 bash scripts/package-dmg.sh    # build/dist/*.dmg + .sha256
 bash scripts/verify-dmg.sh     # mount · install · copied-launch · missing-CLI
+swift run MuseDiagnostics      # offline echo round-trip against the installed CLI
 ```
 
 `scripts/swift-local.sh` keeps compiler and package caches inside the project — quit the app before rebuilding its bundle. CI ([`build.yml`](.github/workflows/build.yml)) runs the same on a clean `macos-15` runner; [`release.yml`](.github/workflows/release.yml) rebuilds → retests → repackages → publishes on each `v*` tag; [`demo-media.yml`](.github/workflows/demo-media.yml) regenerates the captures.
