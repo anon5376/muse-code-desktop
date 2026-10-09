@@ -1,4 +1,7 @@
 #!/bin/bash
+# Wraps `swift` so compiler/package caches stay inside .build/ — keeps the
+# project self-contained and CI cache-friendly.
+# Usage: bash scripts/swift-local.sh [swift-subcommand] [args...]
 set -euo pipefail
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$project_root"

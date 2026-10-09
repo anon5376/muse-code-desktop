@@ -1,4 +1,7 @@
 #!/bin/bash
+# Builds build/Muse Code.app (release by default): SwiftPM build, bundle layout,
+# icon, Info.plist, ad-hoc signature.
+# Usage: bash scripts/build-app.sh [release|debug]
 set -euo pipefail
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 configuration="${1:-release}"
