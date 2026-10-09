@@ -26,6 +26,7 @@ enum CoreTests {
             ("transcript ignores deltas for unknown or inactive items", testTranscriptDeltaEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
+            ("JSONValue accessors stay total and bounds-checked", testJSONValueAccessors),
             ("Markdown edges: tilde fences, indents, quotes, rules", testMarkdownEdges)
         ]
         var failures = 0
