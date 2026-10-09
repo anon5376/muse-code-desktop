@@ -2,6 +2,8 @@ import SwiftUI
 import AppKit
 import MuseCore
 
+/// One row in the session sidebar, decoded from `session/list`. An empty
+/// title always reads "New session" — the UI never invents names.
 struct SessionSummary: Identifiable, Equatable {
     let id: String
     var title: String
@@ -20,6 +22,10 @@ struct SessionSummary: Identifiable, Equatable {
     }
 }
 
+/// A route in Muse's model catalog. `id` is a length-prefixed
+/// provider/profile/model key so the same model on two profiles stays
+/// distinct; `dataUseNotice` surfaces contributor/training descriptions as
+/// the amber badge.
 struct ModelEntry: Identifiable {
     let raw: JSONValue
     var modelID: String { raw["modelId"].string ?? "" }
@@ -47,6 +53,9 @@ struct ModelEntry: Identifiable {
 }
 
 @MainActor
+/// Live per-session view-state owned by the store. A class (not a struct)
+/// so background turns and pending requests update in place while a
+/// different session is selected.
 final class SessionState {
     var transcript = Transcript()
     var activeTurn: String?
@@ -71,6 +80,9 @@ final class SessionState {
 }
 
 @MainActor
+/// The app's single source of truth: owns the `MuseConnection` lifecycle,
+/// session list and selection, the composer draft, model catalog, and every
+/// pending approval/question decision. All mutable state is `@MainActor`.
 final class WorkspaceStore: ObservableObject {
     enum EngineState { case disconnected, connecting, ready, failed }
     @Published var engine: EngineState = .disconnected
