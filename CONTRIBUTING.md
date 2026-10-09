@@ -2,6 +2,13 @@
 
 Small, focused PRs only — one improvement per change.
 
+## Reporting bugs
+
+Use the bug-report issue template and include the macOS version, the Muse CLI
+version (`muse --version`), and which fixture or real session showed the
+problem. Security issues go through private advisories (see SECURITY.md),
+never a public issue.
+
 ## Setup
 
 - macOS 14+, Apple Silicon
