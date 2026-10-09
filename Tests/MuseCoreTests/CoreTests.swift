@@ -19,6 +19,7 @@ enum CoreTests {
             ("final revisions replace deltas and resist replay", testStreamingFoldReplacesFinalRevisionAndIgnoresReplayedInput),
             ("tool output and unknown terminal items remain readable", testToolOutputAndUnknownTerminalItemsRemainReadable),
             ("question answers obey the host's exclusive variants and bounds", testQuestionAnswerContract),
+            ("question answers enforce counts, ids, and text limits", testQuestionAnswerEdges),
             ("permission summaries expose network targets and file access", testApprovalSubjectDisclosure),
             ("unavailable resume history cannot become a healthy empty transcript", testUnavailableHistory),
             ("transcript ignores deltas for unknown or inactive items", testTranscriptDeltaEdges),
@@ -231,6 +232,24 @@ enum CoreTests {
         try equal(UserInputAnswer.make(question: single, selections: [], freeText: String(repeating: "x", count: 501)), nil)
         try equal(UserInputAnswer.make(question: single, selections: ["unknown"], freeText: ""), nil)
         try equal(UserInputAnswer.make(question: .object(multiple), selections: [], freeText: ""), nil)
+    }
+
+    static func testQuestionAnswerEdges() throws {
+        let single: JSONValue = .object(["id": .string("q"), "selection": .object(["mode": .string("single")]),
+            "options": .array([.object(["label": .string("A")]), .object(["label": .string("B")])])])
+        // Exactly 500 scalars of free text is the accepted bound.
+        try equal(UserInputAnswer.make(question: single, selections: [], freeText: String(repeating: "x", count: 500)) != nil, true)
+        // Single-choice mode rejects two selections.
+        try equal(UserInputAnswer.make(question: single, selections: ["A", "B"], freeText: ""), nil)
+        // Multiple mode enforces minSelections.
+        let minimum: JSONValue = .object(["id": .string("q"), "selection": .object(["mode": .string("multiple"), "minSelections": .number(2)]),
+            "options": .array([.object(["label": .string("A")]), .object(["label": .string("B")]), .object(["label": .string("C")])])])
+        try equal(UserInputAnswer.make(question: minimum, selections: ["A"], freeText: ""), nil)
+        try equal(UserInputAnswer.make(question: minimum, selections: ["A", "C"], freeText: "") != nil, true)
+        // A valid label mixed with an invented one is rejected wholesale.
+        try equal(UserInputAnswer.make(question: single, selections: ["A", "invented"], freeText: ""), nil)
+        // Missing or empty question id cannot be answered.
+        try equal(UserInputAnswer.make(question: .object(["selection": single["selection"], "options": single["options"]]), selections: ["A"], freeText: ""), nil)
     }
 
     static func testApprovalSubjectDisclosure() throws {
