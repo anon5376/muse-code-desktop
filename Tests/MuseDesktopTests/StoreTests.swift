@@ -56,6 +56,22 @@ enum StoreTests {
                 } else { failures += 1; print("FAIL session summary title fallback") }
             }
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+            // FileBrowser.scan: omitted dirs, symlinks and hidden files are
+            // skipped; directories sort before files, names locale-sorted.
+            do {
+                let fm = FileManager.default
+                let scanRoot = root.appendingPathComponent("scan")
+                try fm.createDirectory(at: scanRoot.appendingPathComponent("src"), withIntermediateDirectories: true)
+                try fm.createDirectory(at: scanRoot.appendingPathComponent("node_modules/pkg"), withIntermediateDirectories: true)
+                try "code".write(to: scanRoot.appendingPathComponent("src/a.swift"), atomically: true, encoding: .utf8)
+                try "secret".write(to: scanRoot.appendingPathComponent(".env"), atomically: true, encoding: .utf8)
+                try "dep".write(to: scanRoot.appendingPathComponent("node_modules/pkg/i.js"), atomically: true, encoding: .utf8)
+                try fm.createSymbolicLink(at: scanRoot.appendingPathComponent("link"), withDestinationURL: scanRoot.appendingPathComponent("src"))
+                let nodes = try FileBrowser.scan(scanRoot)
+                if nodes.count == 1, nodes[0].isDirectory, nodes[0].children?.map(\.name) == ["a.swift"] {
+                    print("PASS file scan skips omitted dirs, hidden files and symlinks")
+                } else { failures += 1; print("FAIL file scan surfaced \(nodes.map(\.name))") }
+            } catch { failures += 1; print("FAIL file scan threw: \(error)") }
             // The lifecycle checks below exercise a real `muse serve --provider echo` host.
             // Without an installed CLI they are skipped, not failed.
             if MuseExecutable.locate() != nil {
