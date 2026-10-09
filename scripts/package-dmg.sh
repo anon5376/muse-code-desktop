@@ -63,13 +63,18 @@ hdiutil create -volname "Muse Code $version" \
 
 # 6. Verify: mount, check contents, detach — leaves the source tree untouched.
 mount_point="$(mktemp -d /tmp/muse-dmg-XXXXXX)"
+cleanup_mount() {
+    [[ -n "${mount_point:-}" ]] && hdiutil detach "$mount_point" -force -quiet 2>/dev/null || true
+    rm -rf "$stage_dir"
+    [[ -n "${mount_point:-}" ]] && rmdir "$mount_point" 2>/dev/null || true
+}
+trap cleanup_mount EXIT
 hdiutil attach "$dmg_path" -mountpoint "$mount_point" -nobrowse -readonly
 test -d "$mount_point/Muse Code.app/Contents/MacOS"
 test -f "$mount_point/Muse Code.app/Contents/Resources/Muse.icns"
 test -L "$mount_point/Applications"
 hdiutil detach "$mount_point" -quiet
-rmdir "$mount_point"
-rm -rf "$stage_dir"
+mount_point=""
 
 echo "DMG: $dmg_path"
 echo "SHA-256: $(cat "$dmg_path.sha256")"
