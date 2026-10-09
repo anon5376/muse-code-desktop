@@ -45,10 +45,6 @@ enum StoreTests {
                 try "dep".write(to: scanRoot.appendingPathComponent("node_modules/pkg/i.js"), atomically: true, encoding: .utf8)
                 try fm.createSymbolicLink(at: scanRoot.appendingPathComponent("link"), withDestinationURL: scanRoot.appendingPathComponent("src"))
                 let nodes = try FileBrowser.scan(scanRoot)
-                let names = nodes.map(\.name)
-                if names == ["src", "a.swift"] || names == ["src", "link".count > 0 ? "a.swift" : "a.swift"] {
-                    // handled below
-                }
                 if nodes.count == 1, nodes[0].isDirectory, nodes[0].children?.map(\.name) == ["a.swift"] {
                     print("PASS file scan skips omitted dirs, hidden files and symlinks")
                 } else { failures += 1; print("FAIL file scan surfaced \(names)") }
