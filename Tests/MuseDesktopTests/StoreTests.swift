@@ -32,6 +32,29 @@ enum StoreTests {
             if catalogStore.chosenModel?.id == contributor.id, catalogStore.modelLabel.contains("Contributor") {
                 print("PASS configured default resolves to its actual catalog model")
             } else { failures += 1; print("FAIL configured default hides its actual model") }
+            // ModelEntry: display name prettifies muse-spark ids, data-use
+            // notices surface only for contributor/training descriptions, and
+            // the search match covers label/model/provider/profile.
+            do {
+                if contributor.displayName == "Muse Spark 1.3 · Contributor", contributor.dataUseNotice != nil,
+                   contributor.matches("SPARK"), contributor.matches("personal"), !contributor.matches("nonexistent") {
+                    print("PASS model entries label, notice and match honestly")
+                } else { failures += 1; print("FAIL model entry labeling or data-use notice") }
+                let plain = ModelEntry(raw: .object(["modelId": .string("other-model"), "providerId": .string("meta"),
+                    "profileId": .string("work"), "description": .string("General availability")]))
+                if plain.displayName == "other-model", plain.dataUseNotice == nil, plain.id != contributor.id {
+                    print("PASS non-contributor routes carry no invented notice")
+                } else { failures += 1; print("FAIL non-contributor route got a notice or collided id") }
+            }
+            // SessionSummary: an empty title always reads "New session".
+            do {
+                let titled = SessionSummary(.object(["sessionId": .string("s1"), "title": .string("Real title")]))
+                let empty = SessionSummary(.object(["sessionId": .string("s2"), "title": .string("")]))
+                let untitled = SessionSummary(.object(["sessionId": .string("s3")]))
+                if titled.title == "Real title", empty.title == "New session", untitled.title == "New session", untitled.id == "s3" {
+                    print("PASS session summaries never show a blank title")
+                } else { failures += 1; print("FAIL session summary title fallback") }
+            }
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
             // The lifecycle checks below exercise a real `muse serve --provider echo` host.
             // Without an installed CLI they are skipped, not failed.
