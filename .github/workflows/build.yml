@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 # Cancel a superseded run on the same ref — new commits don't need the
 # in-flight job to finish first.
