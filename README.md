@@ -133,6 +133,10 @@ open "build/Muse Code.app" --args --echo --workspace "$PWD"
 
 [Signal Desk](DESIGN.md): neutral charcoal surfaces, one-point hairlines, Muse blue for selection and focus, amber for requests and data-use notices. The bundled logo is the unchanged SVG from Muse's public site — [provenance and license boundary](docs/brand-assets.md) · [verification evidence](docs/verification.md).
 
+## ✦ Contributing
+
+Small focused PRs — see [CONTRIBUTING.md](CONTRIBUTING.md). Security reports go through [private advisories](SECURITY.md), not public issues.
+
 ## ✦ License
 
 Wrapper source: [MIT](LICENSE). The Muse CLI is a separate installed product and is not bundled. Muse and its logo belong to Meta — the bundled logo and trademarks are **not** covered by the MIT license.
