@@ -382,7 +382,6 @@ enum CoreTests {
         try equal(MarkdownBlocks.parse(""), [])
     }
 
-<<<<<<< HEAD
     static func testActivityStatusLabels() throws {
         // Every wire status in the map has a stable human label.
         try equal(ActivityStatus.label("inProgress"), "Running")
