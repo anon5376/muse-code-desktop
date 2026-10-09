@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
 
+# Cancel a superseded run on the same ref — new commits don't need the
+# in-flight job to finish first.
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
