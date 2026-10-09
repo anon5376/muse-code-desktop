@@ -1,6 +1,8 @@
 import Foundation
 import Darwin
 
+/// User-facing failure modes of the supervised `muse serve` connection.
+/// Every case carries wording suitable for the transcript error surface.
 public enum ConnectionFailure: Error, LocalizedError {
     case notRunning
     case timeout(String)
@@ -18,6 +20,8 @@ public enum ConnectionFailure: Error, LocalizedError {
     }
 }
 
+/// How to spawn the host: executable, workspace, argv, extra environment,
+/// and the capabilities the client requests during initialize.
 public struct MuseLaunchConfiguration: Sendable {
     public var executable: URL
     public var workspace: URL
@@ -30,6 +34,8 @@ public struct MuseLaunchConfiguration: Sendable {
     }
 }
 
+/// Finds the installed Muse CLI: explicit override first, then the
+/// documented install paths, then PATH. Never bundled with the app.
 public enum MuseExecutable {
     public static func locate(preferredPath: String? = nil) -> URL? {
         let home = FileManager.default.homeDirectoryForCurrentUser
@@ -39,6 +45,11 @@ public enum MuseExecutable {
     }
 }
 
+/// Owns one `muse serve` child process and its JSON-RPC session.
+///
+/// All state mutations funnel through a serial queue; `stdin` writes are
+/// serialized on a second queue so stream events can never interleave with
+/// request frames. Events are delivered batched on flush.
 public final class MuseConnection: @unchecked Sendable {
     public static let expectedFingerprint = "sha256:61afea3112e0906e9dc3a536144278a74cb4b36fc6e20901a91d4432ba3568e2"
     private let queue = DispatchQueue(label: "muse.native.protocol", qos: .userInitiated)
