@@ -125,6 +125,9 @@ Poke at the whole UI offline — real `muse` echo provider, no model calls, work
 open "build/Muse Code.app" --args --echo --workspace "$PWD"
 ```
 
+All launch flags (including `--muse-executable <path>`) live in
+[docs/launch-flags.md](docs/launch-flags.md).
+
 ## ✦ Troubleshooting
 
 - **"App is damaged" / unidentified developer** — expected: the DMG is ad-hoc
