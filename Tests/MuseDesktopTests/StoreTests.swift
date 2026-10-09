@@ -47,7 +47,7 @@ enum StoreTests {
                 let nodes = try FileBrowser.scan(scanRoot)
                 if nodes.count == 1, nodes[0].isDirectory, nodes[0].children?.map(\.name) == ["a.swift"] {
                     print("PASS file scan skips omitted dirs, hidden files and symlinks")
-                } else { failures += 1; print("FAIL file scan surfaced \(names)") }
+                } else { failures += 1; print("FAIL file scan surfaced \(nodes.map(\.name))") }
             } catch { failures += 1; print("FAIL file scan threw: \(error)") }
             // The lifecycle checks below exercise a real `muse serve --provider echo` host.
             // Without an installed CLI they are skipped, not failed.
