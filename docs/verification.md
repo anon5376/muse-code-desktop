@@ -101,3 +101,17 @@ The resize helper now selects the workspace window by title rather than the firs
 The fresh code reviewer cleared the repaired client findings, including draft retry ownership and session-local failures. The fresh native visual reviewer validated 18 required captures, initially returned fix for palette focus, then returned **ship for the scored repair/local visual candidate**. Generic reviewers substitute for unavailable named Impeccable roles; no HTML detector was applied to native Swift. See [review.md](review.md).
 
 Still open: live-provider turns and reasoning, real approval/question decisions, successful skill expansion, shell/goal/agent/workflow/stored-output behavior, durable restoration, remaining descendants on real quit, long-session stress, Intel builds, and user design approval. The owner explicitly authorized source publication as `muse-code-desktop` on 2026-10-08. Promotion has not started and requires separate approval. See [acceptance](acceptance.md).
+
+## Reproduce
+
+On macOS with the Swift toolchain:
+
+```sh
+bash scripts/test.sh           # core + workspace suites
+bash scripts/build-app.sh      # release bundle
+bash scripts/package-dmg.sh    # build/dist DMG + sha256
+bash scripts/verify-dmg.sh     # mount / install / copied-launch check
+```
+
+The recorded local video and raw frames are excluded from publication; the
+command sequence above regenerates equivalent checks on any Mac.
