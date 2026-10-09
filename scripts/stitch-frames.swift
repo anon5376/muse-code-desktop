@@ -1,5 +1,7 @@
 // Stitches captured PNG frames into an animated GIF and an H.264 MP4.
 // Pure ImageIO/AVFoundation; no dependencies beyond the OS.
+// Stitches capture-demo frames into demo.gif + demo.mp4 (AVFoundation; no deps).
+// Usage: swift stitch-frames.swift <frames-dir> <out.gif> <out.mp4>
 import Foundation
 import ImageIO
 import AVFoundation
