@@ -34,7 +34,12 @@ enum CoreTests {
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
             ("JSONValue accessors stay total and bounds-checked", testJSONValueAccessors),
+<<<<<<< HEAD
             ("status labels map known wires and humanize unknown camelCase", testActivityStatusLabels),
+||||||| parent of 2945945 (Test command-id wire format)
+=======
+            ("command ids carry the UUIDv7 shape and stay unique", testCommandIDFormat),
+>>>>>>> 2945945 (Test command-id wire format)
             ("Markdown edges: tilde fences, indents, quotes, rules", testMarkdownEdges)
         ]
         var failures = 0
@@ -381,6 +386,7 @@ enum CoreTests {
         try equal(MarkdownBlocks.parse(""), [])
     }
 
+<<<<<<< HEAD
     static func testActivityStatusLabels() throws {
         // Every wire status in the map has a stable human label.
         try equal(ActivityStatus.label("inProgress"), "Running")
@@ -396,6 +402,28 @@ enum CoreTests {
         try equal(ActivityStatus.label("paused"), "Paused")
     }
 
+||||||| parent of 2945945 (Test command-id wire format)
+=======
+    static func testCommandIDFormat() throws {
+        // 8-4-4-4-12 layout with version nibble 7 and variant in 8..b —
+        // the shape hosts pattern-match for turn/response correlation.
+        var seen = Set<String>()
+        for _ in 0..<1_000 {
+            let id = CommandID.make()
+            try equal(id.count, 36)
+            let chars = Array(id)
+            for dash in [8, 13, 18, 23] { try equal(chars[dash], "-") }
+            try equal(chars[14], "7")
+            guard "89ab".contains(chars[19]) else {
+                throw Failure(description: "variant nibble out of range: \(chars[19])")
+            }
+            guard seen.insert(id).inserted else {
+                throw Failure(description: "duplicate command id")
+            }
+        }
+    }
+
+>>>>>>> 2945945 (Test command-id wire format)
     static func testJSONValueAccessors() throws {
         // Subscripting a non-object and missing keys both stay `.null` —
         // chained lookups on hostile payloads must never crash.
