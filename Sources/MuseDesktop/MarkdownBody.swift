@@ -2,6 +2,8 @@ import SwiftUI
 import AppKit
 import MuseCore
 
+/// Renders `MarkdownBlocks` for transcript text. Streaming replies parse
+/// with `isStreaming` so a trailing partial line renders as a partial block.
 struct MarkdownBody: View {
     let text: String
     var isStreaming = false

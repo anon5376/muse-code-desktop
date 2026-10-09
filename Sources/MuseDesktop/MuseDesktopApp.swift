@@ -13,6 +13,8 @@ enum MuseDesktopApp {
 }
 
 @MainActor
+/// AppKit delegate: owns the window lifecycle, menu wiring, and keyboard
+/// shortcut validation (⌘O/⌘N/⌘K/⌘Return/⌘. etc.) for the SwiftUI content.
 final class MuseAppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     private let store = WorkspaceStore()
     private var window: NSWindow?

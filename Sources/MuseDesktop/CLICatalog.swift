@@ -2,6 +2,8 @@ import Foundation
 import MuseCore
 import Darwin
 
+/// A skill from the session catalog. `selector` is what the host expects
+/// at send time; `name` is the display label — they can differ.
 struct SkillEntry: Identifiable {
     let raw: JSONValue
     var selector: String? { raw["selector"].string }
@@ -16,6 +18,8 @@ struct SkillEntry: Identifiable {
     }
 }
 
+/// Decodes `skill/list` results and resolves a chip to the selector the
+/// host actually accepts (selector → display name → slug fallback).
 enum CLICatalog {
     enum Kind { case skills, plugins }
 

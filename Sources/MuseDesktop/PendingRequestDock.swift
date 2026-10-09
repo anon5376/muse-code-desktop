@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Dock above the composer holding every pending approval/question.
+/// Multiple requests are paged in arrival order — one card at a time.
 struct PendingRequestDock: View {
     @ObservedObject var store: WorkspaceStore
     @State private var selectedID: String?

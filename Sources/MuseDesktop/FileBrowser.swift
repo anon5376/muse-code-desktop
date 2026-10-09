@@ -1,5 +1,6 @@
 import Foundation
 
+/// A node in the workspace file tree (directory or file, lazily loaded).
 struct FileNode: Identifiable, Sendable {
     let url: URL
     let isDirectory: Bool
@@ -8,6 +9,8 @@ struct FileNode: Identifiable, Sendable {
     var name: String { url.lastPathComponent }
 }
 
+/// Bounded read-only preview: text capped at 256 KiB, hidden files and
+/// symlinks skipped.
 struct FilePreview: Sendable {
     let url: URL
     let relativePath: String
@@ -15,6 +18,8 @@ struct FilePreview: Sendable {
     let truncated: Bool
 }
 
+/// Workspace scanning for the Files tab — read-only, bounded, and
+/// never follows symlinks or hidden entries.
 enum FileBrowser {
     static let omitted = Set(["node_modules", "build", "dist", "target", "Pods", "__pycache__", "vendor"])
 
