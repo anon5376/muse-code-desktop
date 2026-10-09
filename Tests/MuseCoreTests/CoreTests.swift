@@ -24,6 +24,7 @@ enum CoreTests {
             ("permission summaries expose network targets and file access", testApprovalSubjectDisclosure),
             ("unavailable resume history cannot become a healthy empty transcript", testUnavailableHistory),
             ("transcript ignores deltas for unknown or inactive items", testTranscriptDeltaEdges),
+            ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown)
         ]
@@ -288,6 +289,27 @@ enum CoreTests {
         try equal(try SessionHistory.items(.object(["mode": .string("inline"), "items": .array([item])])), [item])
         try equal(try SessionHistory.items(.object(["mode": .string("snapshot"), "snapshot": .object([
             "schemaVersion": .number(1), "state": .object(["items": .array([item])])])])), [item])
+    }
+
+    static func testHistoryDecodeEdges() throws {
+        // mode=none wins even when items are present — the host's explicit
+        // unavailability must not degrade to a partial transcript.
+        do {
+            _ = try SessionHistory.items(.object(["mode": .string("none"), "noneReason": .string("budget"),
+                "items": .array([.object(["itemId": .string("x")])])]))
+            throw Failure(description: "mode=none history with items was accepted")
+        } catch let error as ConnectionFailure { _ = error }
+        // Snapshot requires schemaVersion 1.
+        do {
+            _ = try SessionHistory.items(.object(["snapshot": .object(["schemaVersion": .number(2),
+                "state": .object(["items": .array([])])])]))
+            throw Failure(description: "snapshot schemaVersion 2 was accepted")
+        } catch let error as ConnectionFailure { _ = error }
+        // Neither items nor snapshot → explicit protocol error, not [].
+        do {
+            _ = try SessionHistory.items(.object(["mode": .string("inline")]))
+            throw Failure(description: "history with no payload was accepted")
+        } catch let error as ConnectionFailure { _ = error }
     }
 
     static func testMarkdownBlocks() throws {
