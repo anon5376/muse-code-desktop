@@ -1,4 +1,6 @@
 #!/bin/bash
+# Runs only the workspace store tests against the ModelHost fixture.
+# Usage: bash scripts/test-workspace.sh
 set -euo pipefail
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$project_root"

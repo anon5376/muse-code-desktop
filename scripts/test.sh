@@ -1,4 +1,6 @@
 #!/bin/bash
+# Runs the full suite: MuseCoreTests + workspace store tests.
+# Usage: bash scripts/test.sh
 set -euo pipefail
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 bash "$project_root/scripts/swift-local.sh" build --product MuseCoreTests
