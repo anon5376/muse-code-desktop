@@ -102,7 +102,10 @@ Muse Code.app                    SwiftUI / AppKit · macOS 14+ · zero deps
                                     agent execution, tools, durable sessions
 ```
 
-Tests are standalone Swift executables, not XCTest: `Tests/MuseCoreTests` exercises transport against real child processes; `Tests/MuseDesktopTests` drives the production store against the synthetic `ReviewHost`/`ModelHost` fixtures — which never touch a provider or run tools. The ReviewHost also powers the demo media above.
+Tests are standalone Swift executables, not XCTest: `Tests/MuseCoreTests` exercises transport against real child processes; `Tests/MuseDesktopTests` drives the production store against the synthetic `ReviewHost`/`ModelHost` fixtures — which never touch a provider or run tools — see
+[docs/fixtures.md](docs/fixtures.md) for their contracts and
+[docs/architecture.md](docs/architecture.md) for the full source layout. The
+ReviewHost also powers the demo media above.
 
 ## ✦ Build & verify
 
