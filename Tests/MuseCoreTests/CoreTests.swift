@@ -1,3 +1,8 @@
+// MuseCoreTests: protocol-layer checks — framing, transcript folding,
+// request contracts, markdown splitting, history decoding — plus an
+// integration tail driven against the synthetic ReviewHost fixture.
+// Pure checks are registered in the `tests:` array (an unregistered test
+// never runs); each prints PASS/FAIL and the run fails on any FAIL.
 import Foundation
 import MuseCore
 import Darwin
