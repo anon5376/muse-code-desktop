@@ -31,6 +31,12 @@ input — do not move or delete the tag. Asset uploads are clobbered cleanly.
 both attached to the prerelease. Verify locally with
 `bash scripts/verify-dmg.sh <dmg>` before promoting the prerelease.
 
+## Versioning
+
+`0.x` tags ship as GitHub **prereleases** while hands-on acceptance and
+design approval remain open (see [acceptance.md](acceptance.md)). `1.0.0`
+should wait for a passed acceptance checklist, not for a feature checklist.
+
 ## Honest limits
 
 Ad-hoc signed, not notarized, arm64 only. Those limits ship in the release
