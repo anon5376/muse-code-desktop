@@ -17,7 +17,8 @@ bash scripts/package-dmg.sh    # reproducible DMG + .sha256
 bash scripts/verify-dmg.sh     # mount/install/launch checks
 ```
 
-Tests are standalone Swift executables (not XCTest). Workspace tests run the
+Tests are standalone Swift executables (not XCTest) — conventions and CI
+mapping live in [docs/testing.md](docs/testing.md). Workspace tests run the
 production store against synthetic fixtures (`ReviewHost`, `ModelHost`) — they
 never touch a provider, model, or real tools. Keep it that way.
 
