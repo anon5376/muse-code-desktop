@@ -1,5 +1,7 @@
 import Foundation
 
+/// Result of one offline handshake against the host: server version,
+/// wire-schema fingerprint, reply text, and round-trip time.
 public struct DiagnosticReport: Sendable {
     public let version: String
     public let fingerprint: String
@@ -7,6 +9,11 @@ public struct DiagnosticReport: Sendable {
     public let elapsedMilliseconds: Int
 }
 
+/// Offline end-to-end check used by Settings' "Test connection" and
+/// `MuseDiagnostics`: spawns `muse serve --provider echo` in a sandboxed
+/// temporary root (config/data/cache redirected, writes and shell disabled),
+/// runs initialize → session/start → turn/start → turn/completed → shutdown,
+/// and reports the reply. Never contacts a real provider.
 public enum EchoDiagnostic {
     public static func configuration(executable: URL, workspace: URL, temporaryRoot: URL) throws -> MuseLaunchConfiguration {
         try FileManager.default.createDirectory(at: temporaryRoot, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
