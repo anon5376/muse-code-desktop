@@ -1,3 +1,7 @@
+// Workspace-store suite against the synthetic ModelHost fixture — async
+// lifecycle, pending-request, and file-scan checks. Real-`muse serve` echo
+// checks SKIP when no CLI is installed. New checks print PASS/FAIL and
+// increment `failures`; run via scripts/test-workspace.sh.
 import Foundation
 import MuseCore
 import Darwin
