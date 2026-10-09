@@ -5,6 +5,8 @@
 | [acceptance.md](acceptance.md) | Hands-on acceptance checklist and publication record |
 | [verification.md](verification.md) | Executed verification evidence (commands, outputs, limits) |
 | [testing.md](testing.md) | Test layout, fixtures, conventions, and CI mapping |
+| [architecture.md](architecture.md) | Two-layer structure and per-file responsibilities |
+| [fixtures.md](fixtures.md) | ReviewHost/ModelHost synthetic host contracts |
 | [uiux-review.md](uiux-review.md) | Interactive UI/UX review from a real macOS session |
 | [review.md](review.md) | Code/visual reviewer dispositions for the v0.1.0 candidate |
 | [claude-review-response.md](claude-review-response.md) | Disposition of the user-supplied external review |
