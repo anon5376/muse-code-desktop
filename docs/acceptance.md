@@ -13,7 +13,7 @@ This is a local test candidate. User testing and design approval are pending. Au
 7. Test reconnect and quit during a harmless long-running tool. Check elapsed time and remaining descendants. The automated inherited-pipe regression establishes bounded closure, not whole-process-group cleanup.
 8. Resize to actual outer sizes **980 × 640** and **1280 × 820**. Check the empty view, Markdown, model picker, palette, long request body and all four inspector tabs. Confirm the design and navigation meet your expectations.
 
-Record each failure with the action, expected behavior, actual result and useful capture. A failed or unrun step remains open. See [verification.md](verification.md) for executed evidence and [claude-review-response.md](claude-review-response.md) for the supplied review's disposition.
+Record each failure with the action, expected behavior, actual result and useful capture. A failed or unrun step remains open. See [verification.md](verification.md) for executed evidence, [testing.md](testing.md) for the automated suites and [fixtures.md](fixtures.md) for the synthetic hosts behind them, and [claude-review-response.md](claude-review-response.md) for the supplied review's disposition.
 
 ## Source publication
 
