@@ -2,6 +2,8 @@ import SwiftUI
 import AppKit
 import MuseCore
 
+/// Connection settings: Muse executable override, offline diagnostic
+/// self-test, and the unofficial-client disclosure.
 struct SettingsView: View {
     @ObservedObject var store: WorkspaceStore
     @State private var path = ""

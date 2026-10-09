@@ -1,6 +1,9 @@
 import SwiftUI
 import AppKit
 
+/// The optional right-hand inspector: Files · Activity · Skills · Session
+/// tabs, read-only previews plus host controls. Placement is decided by
+/// WorkspaceView's 560pt rule.
 struct InspectorView: View {
     @ObservedObject var store: WorkspaceStore
     var body: some View {
@@ -73,6 +76,7 @@ struct InspectorView: View {
 
 }
 
+/// NSTextView-backed selectable code/file preview (read-only).
 struct NativeCodeView: NSViewRepresentable {
     let text: String
     func makeNSView(context: Context) -> NSScrollView {
