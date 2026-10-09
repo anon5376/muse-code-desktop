@@ -1,3 +1,7 @@
+// MuseDiagnostics: a small CLI that runs EchoDiagnostic against the installed
+// Muse binary — handshake, session, streamed echo reply, shutdown. It never
+// contacts a real provider. Optional first argument: path to a `muse`
+// executable (otherwise the same search order as the app is used).
 import Foundation
 import MuseCore
 import Darwin
