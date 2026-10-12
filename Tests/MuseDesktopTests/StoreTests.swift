@@ -536,6 +536,28 @@ enum StoreTests {
                    fixtureStore.current?.provider == "fixture" {
                     print("PASS setModel clears the effort and lands the route change")
                 } else { failures += 1; print("FAIL setModel: effort \(fixtureStore.reasoningEffort ?? "nil") err \(fixtureStore.modelError ?? "nil")") }
+                // Library/inspector visibility is exclusive; chooseSkill
+                // dismisses the library.
+                fixtureStore.openLibrary("Skills")
+                if fixtureStore.libraryVisible, fixtureStore.libraryTab == "Skills" {
+                    print("PASS openLibrary raises the chosen tab")
+                } else { failures += 1; print("FAIL openLibrary state") }
+                fixtureStore.showInspector("Activity")
+                if fixtureStore.inspectorVisible, fixtureStore.inspectorTab == "Activity", !fixtureStore.libraryVisible {
+                    print("PASS the inspector dismisses the library")
+                } else { failures += 1; print("FAIL showInspector state") }
+                fixtureStore.openLibrary("Skills")
+                fixtureStore.chooseSkill(SkillEntry(raw: .object(["selector": .string("fixture-skill"), "activation": .string("on")])))
+                if !fixtureStore.libraryVisible, fixtureStore.pendingSkill != nil {
+                    print("PASS chooseSkill dismisses the library")
+                } else { failures += 1; print("FAIL chooseSkill kept the library open") }
+                fixtureStore.pendingSkill = nil; fixtureStore.inspectorVisible = false
+                // useDefaultModel applies only with no session selected.
+                fixtureStore.newSession()
+                fixtureStore.useDefaultModel()
+                if fixtureStore.selectedModelKey == "" {
+                    print("PASS useDefaultModel clears the catalog selection")
+                } else { failures += 1; print("FAIL useDefaultModel: \(fixtureStore.selectedModelKey)") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
