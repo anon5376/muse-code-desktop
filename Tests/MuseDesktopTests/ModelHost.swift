@@ -70,6 +70,10 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             event("userInput/requested", ["sessionId": target, "userInputId": "q-1",
                 "question": ["id": "q", "selection": ["mode": "single"], "options": [["label": "A"], ["label": "B"]]]])
         }
+        if (input.first?["text"] as? String) == "session list hygiene" {
+            event("session/started", ["session": ["sessionId": "other-ws", "title": "Foreign", "workspaceRoot": "/nonexistent"]])
+            event("session/started", ["session": ["sessionId": "extra-s", "title": "New session", "workspaceRoot": lastWorkspace]])
+        }
         if (input.first?["text"] as? String) == "rename demo" {
             event("session/started", ["session": ["sessionId": "extra-r", "title": "Old", "workspaceRoot": lastWorkspace]])
             event("session/nameChanged", ["sessionId": "extra-r", "name": "Renamed"])
