@@ -29,6 +29,11 @@ keeps compiler caches inside `.build/`.
   source of a real flake (see the 200ms `asyncAfter` in `ModelHost.swift`).
 - Echo/round-trip checks that need a real `muse serve` binary `SKIP` cleanly
   when none is installed (CI runners do not have it).
+- Catalog calls are context-dependent: `refreshSkills`/`refreshPlugins`
+  answer over the session `skill/list` RPC only when a session is loaded;
+  without one they fall back to `CLICatalog.read`, which shells out to a
+  real `muse` binary — asserting on the RPC path requires a loaded session
+  first.
 
 ## CI mapping
 
