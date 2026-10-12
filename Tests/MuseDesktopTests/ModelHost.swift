@@ -32,6 +32,9 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     case "session/start":
         sessionNumber += 1; sessionID = "model-ordering-session-\(sessionNumber)"; active = true
         result = ["session": ["sessionId": sessionID, "workspaceRoot": params["workspaceRoot"] ?? "", "modelId": "fixture-model", "providerId": "fixture"]]
+    case "approval/decide":
+        result = ["status": "accepted"]
+        event("approval/resolved", ["sessionId": params["sessionId"] ?? sessionID, "approvalId": params["approvalId"] ?? ""])
     case "session/setModel":
         active = true
         event("session/modelChanged", ["sessionId": params["sessionId"] ?? sessionID, "modelId": "fixture-model", "providerId": "fixture"])
@@ -57,6 +60,10 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             }
             writeFrame(["jsonrpc": "2.0", "id": id, "result": result])
             continue
+        }
+        if (input.first?["text"] as? String) == "pending approval check" {
+            event("approval/requested", ["sessionId": target, "approvalId": "appr-1", "currentRequirementId": "req-1",
+                "subject": ["kind": "shell", "command": "ls -la"]])
         }
         event("item/completed", ["sessionId": params["sessionId"] ?? sessionID, "item": ["itemId": "confirmed-effort-" + turnID, "kind": "agentMessage", "status": "completed", "revision": 1, "text": "Requested reasoning: \(params["reasoningEffort"] as? String ?? "default")"]])
         event("turn/completed", ["sessionId": params["sessionId"] ?? sessionID, "turnId": turnID, "terminal": "completed"])
