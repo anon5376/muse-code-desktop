@@ -425,6 +425,17 @@ enum StoreTests {
                 // Last: selecting a listed-but-unloaded session fails resume honestly —
                 // the fixture has no session/resume, so the missing history throws and
                 // the state lands unavailable with an error (send() is dead after this).
+                // Register buf-s in the list, then select it: its resume emits an
+                // item before the result, which must buffer until restore lands.
+                fixtureStore.selectSession(fixtureStore.selectedID!)  // no-op guard sanity
+                fixtureStore.newSession(); fixtureStore.draft = "session list hygiene"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                fixtureStore.selectSession("buf-s")
+                try await waitUntil { fixtureStore.selectedID == "buf-s" && fixtureStore.current?.loaded == true }
+                if fixtureStore.current?.unavailable == false,
+                   fixtureStore.current?.transcript.items.contains(where: { $0.id == "buf-1" }) == true {
+                    print("PASS events buffered during resume fold after restore")
+                } else { failures += 1; print("FAIL buffered: \(fixtureStore.current?.transcript.items.count ?? -1)") }
                 fixtureStore.selectSession("extra-s")
                 try await waitUntil { fixtureStore.errorMessage != nil }
                 if fixtureStore.current?.loaded == false, fixtureStore.errorMessage != nil {
