@@ -18,3 +18,8 @@ Terms used across the docs and source, defined once.
 | pending request | An approval/question waiting on the user, docked above the composer |
 | CommandID | UUIDv7-style request id for correlating late responses |
 | stderrTail | Bounded 8 KiB ring of host stderr kept for diagnostics |
+| `item/delta` | Streaming append to one field of an in-progress item |
+| viewCursor | Replay guard token on a delta — seen cursors are dropped |
+| catalog route | A `model/list` entry: model × provider × profile |
+| fixture beat | A scripted host reaction a test asserts against |
+| turn | One prompt → completion cycle, correlated by `commandId` |
