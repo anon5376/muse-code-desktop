@@ -68,6 +68,14 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             event("userInput/requested", ["sessionId": target, "userInputId": "q-1",
                 "question": ["id": "q", "selection": ["mode": "single"], "options": [["label": "A"], ["label": "B"]]]])
         }
+        if (input.first?["text"] as? String) == "lifecycle demo" {
+            event("session/modelChanged", ["sessionId": target, "modelId": "fixture-model", "providerId": "fixture-provider"])
+            event("session/goalChanged", ["sessionId": target, "goal": ["text": "fixture goal"]])
+            event("session/approvalModeChanged", ["sessionId": target, "mode": "auto"])
+        }
+        if (input.first?["text"] as? String) == "gap demo" {
+            event("view/gap", ["sessionId": target])
+        }
         if (input.first?["text"] as? String) == "stream demo" {
             event("turn/started", ["sessionId": target, "turnId": turnID])
             event("item/started", ["sessionId": target, "item": ["itemId": "m-stream", "kind": "agentMessage", "status": "inProgress", "revision": 1]])
