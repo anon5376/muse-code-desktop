@@ -390,7 +390,7 @@ enum StoreTests {
                 // the fixture has no session/resume, so the missing history throws and
                 // the state lands unavailable with an error (send() is dead after this).
                 fixtureStore.selectSession("extra-s")
-                try await waitUntil { fixtureStore.current?.unavailable == true }
+                try await waitUntil { fixtureStore.errorMessage != nil }
                 if fixtureStore.current?.loaded == false, fixtureStore.errorMessage != nil {
                     print("PASS selectSession surfaces resume failure")
                 } else { failures += 1; print("FAIL resume: \(fixtureStore.errorMessage ?? "none")") }
