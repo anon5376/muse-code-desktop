@@ -43,7 +43,13 @@ Workspace-store fixture used by `scripts/test-workspace.sh`:
   `turn/completed` for `extra-r`; `interrupt demo` starts a turn that only
   `turn/interrupt` ends. The fixture also answers `item/readOutput`,
   `usage/read`, `session/fork` (returns `fork-1` with history), and any
-  method ending in `/action`-style `noop` via `noop/action`
+  method ending in `/action`-style `noop` via `noop/action`.
+  `fail/action` replies `-32601` (actionError path); `upsert/action`
+  returns a `session` to upsert; `track/action` returns a `turnId` it
+  completes 50 ms later; `subagent/readResult` fills the action output.
+  The model catalog adds `reject-m`, whose `session/setModel` is refused
+  (leaves `modelSelectionRequired`), and `skill/list` reports one
+  `fixture-skill`
 - `session/resume` is answered only for the hard-coded id `buf-s` (a
   delayed result with an item event in front, exercising the buffered
   channel); every other id gets an empty result, so resume lands in the
