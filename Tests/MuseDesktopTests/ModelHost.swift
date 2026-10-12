@@ -88,7 +88,7 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
                 "subject": ["kind": "shell", "command": "ls -la"]])
         }
         event("item/completed", ["sessionId": params["sessionId"] ?? sessionID, "item": ["itemId": "confirmed-effort-" + turnID, "kind": "agentMessage", "status": "completed", "revision": 1, "text": "Requested reasoning: \(params["reasoningEffort"] as? String ?? "default")"]])
-        event("turn/completed", ["sessionId": params["sessionId"] ?? sessionID, "turnId": turnID, "terminal": "completed"])
+        event("turn/completed", ["sessionId": params["sessionId"] ?? sessionID, "turnId": turnID, "terminal": "completed", "durationMs": 321])
     default: break
     }
     writeFrame(["jsonrpc": "2.0", "id": id, "result": result])
