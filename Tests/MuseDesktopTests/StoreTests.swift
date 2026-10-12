@@ -435,6 +435,7 @@ enum StoreTests {
                    fixtureStore.current?.transcript.items.contains(where: { $0.id == "buf-1" }) == true {
                     print("PASS events buffered during resume fold after restore")
                 } else { failures += 1; print("FAIL buffered: \(fixtureStore.current?.transcript.items.count ?? -1)") }
+                try await waitUntil { !fixtureStore.isBusy }
                 fixtureStore.selectSession("extra-s")
                 try await waitUntil { fixtureStore.errorMessage != nil }
                 if fixtureStore.current?.loaded == false, fixtureStore.errorMessage != nil {
