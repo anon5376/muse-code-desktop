@@ -50,6 +50,32 @@ enum StoreTests {
                     print("PASS non-contributor routes carry no invented notice")
                 } else { failures += 1; print("FAIL non-contributor route got a notice or collided id") }
             }
+            // SkillEntry: selector wins id/invocationName, display_name falls
+            // back to name, activation gates isEnabled, matches covers all fields.
+            do {
+                let rich = SkillEntry(raw: .object(["selector": .string("sel-x"), "display_name": .string("Pretty"),
+                    "name": .string("slug-x"), "description": .string("Does things"), "scope": .string("user")]))
+                if rich.id == "sel-x", rich.invocationName == "sel-x", rich.name == "Pretty",
+                   rich.source == "user", rich.isEnabled, rich.matches("SLUG"), rich.matches("does things"), !rich.matches("zzz") {
+                    print("PASS skill entries resolve selectors and fallbacks")
+                } else { failures += 1; print("FAIL skill entry: \(rich.id) \(rich.name)") }
+                let bare = SkillEntry(raw: .object(["name": .string("bare")]))
+                if bare.id == "bare", bare.name == "bare", bare.source == "unknown", bare.isEnabled {
+                    print("PASS bare skill entries get safe defaults")
+                } else { failures += 1; print("FAIL bare skill: \(bare.id)") }
+                let disabled = SkillEntry(raw: .object(["name": .string("off"), "activation": .string("disabled")]))
+                if !disabled.isEnabled, SkillEntry(raw: .object(["name": .string("o"), "activation": .string("off")])).isEnabled == false {
+                    print("PASS activation spells disable a skill")
+                } else { failures += 1; print("FAIL activation ignored") }
+            }
+            // ModelEntry.selection carries the wire shape the host expects.
+            do {
+                let sel = contributor.selection
+                if sel["modelId"].string == "muse-spark-1.3-contributor", sel["providerId"].string == "meta",
+                   sel["profileId"].string == "personal" {
+                    print("PASS model selection carries its wire shape")
+                } else { failures += 1; print("FAIL selection: \(sel)") }
+            }
             // visibleSessions: the search field filters case-insensitively.
             do {
                 let filterStore = WorkspaceStore()
