@@ -9,7 +9,7 @@ app only relies on what is listed here.
 
 | Method | Purpose |
 | --- | --- |
-| `initialize` / `initialized` | Handshake; the app advertises `userInputDialogs` |
+| `initialize` / `initialized` | Handshake; `capabilities` advertises `userInputDialogs: true` and carries `requestedCapabilities` — `["userShell"]` for real hosts, empty in echo/fixture mode |
 | `session/list` | Existing sessions for the workspace |
 | `session/start` | New session with workspace root + model route |
 | `session/resume` | Resume durable history |
