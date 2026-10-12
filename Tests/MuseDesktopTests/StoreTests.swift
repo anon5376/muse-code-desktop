@@ -463,6 +463,39 @@ enum StoreTests {
                     print("PASS oversized drafts are refused")
                 } else { failures += 1; print("FAIL oversize: \(fixtureStore.errorMessage ?? "nil")") }
                 fixtureStore.draft = ""; fixtureStore.errorMessage = nil
+                // session/fork upserts + selects the fork and restores its history.
+                // Establish a loaded session first: send() creates one lazily.
+                fixtureStore.draft = "read tool out"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.current?.loaded == true }
+                fixtureStore.forkSession()
+                try await waitUntil { fixtureStore.selectedID == "fork-1" }
+                try await waitUntil { !fixtureStore.isBusy && fixtureStore.current?.loaded == true }
+                if fixtureStore.sessions.contains(where: { $0.id == "fork-1" }),
+                   fixtureStore.current?.transcript.items.contains(where: { $0.id == "f-1" && $0.text == "forked history" }) == true {
+                    print("PASS fork selects the new session with its history")
+                } else { failures += 1; print("FAIL fork: \(fixtureStore.selectedID ?? "nil")") }
+                // interrupt() reaches the host; the turn completes interrupted.
+                fixtureStore.draft = "interrupt demo"; fixtureStore.send()
+                try await waitUntil { fixtureStore.isRunning }
+                fixtureStore.interrupt()
+                try await waitUntil { !fixtureStore.isRunning }
+                if fixtureStore.current?.activeTurn == nil {
+                    print("PASS interrupt clears the running turn")
+                } else { failures += 1; print("FAIL interrupt: \(fixtureStore.current?.activeTurn ?? "nil")") }
+                // readUsage lands the subscription payload.
+                fixtureStore.readUsage()
+                try await waitUntil { fixtureStore.subscriptionUsage != .null }
+                if fixtureStore.subscriptionUsage["plan"].string == "fixture-pro" {
+                    print("PASS readUsage lands the usage payload")
+                } else { failures += 1; print("FAIL usage: \(fixtureStore.subscriptionUsage)") }
+                // sessionAction renders noop reasons and guards goal methods.
+                fixtureStore.sessionAction("noop/action", label: "Probe")
+                try await waitUntil { fixtureStore.actionNotice != nil }
+                if fixtureStore.actionNotice == "Probe: already done." {
+                    print("PASS noop actions surface their reason")
+                } else { failures += 1; print("FAIL notice: \(fixtureStore.actionNotice ?? "nil")") }
+                fixtureStore.actionNotice = nil
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
