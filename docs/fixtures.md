@@ -28,7 +28,9 @@ Workspace-store fixture used by `scripts/test-workspace.sh`:
   `-32602` then accepts the retry; `delayed terminal failure` accepts, emits
   `turn/started`, then `turn/completed` ~200 ms later; any input containing
   `explicit model` is rejected unless `reasoningEffort: "high"` accompanies
-  it
+  it; `pending approval check` emits `approval/requested`
+  mid-turn and `approval/decide` resolves it; `pending question check`
+  emits `userInput/requested` and `userInput/answer` settles it
 - no `session/resume` handler: `session/start`-created sessions report
   `loaded`, so `selectSession` takes the early (no-resume) path. Exercising
   the resume path needs a fixture that answers `session/resume`
