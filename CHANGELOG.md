@@ -4,15 +4,23 @@
 
 Documentation and test hardening only — no product behavior changed.
 
-- Docs: architecture, testing, fixtures, protocol surface, compatibility,
-  releasing runbook, CI map, onboarding, launch flags, media catalog
+- Docs: architecture, testing, fixtures, protocol surface (incl. the
+  initialize capabilities payload), compatibility, releasing runbook, CI
+  map, onboarding, launch flags, media catalog, glossary; DESIGN.md
+  cross-links PRODUCT.md and the machine-readable design.json; superpowers
+  working notes marked as preserved context
 - Tests: frame-limit edges, history decode rejections, markdown edges,
   streaming partials, JSONValue accessor bounds, status labels, command-id
-  format, transcript upsert lifecycle, file-scan exclusions
+  format, transcript upsert lifecycle, file-scan exclusions, stale-revision
+  rejection, delta field whitelist + view-cursor dedup, JSONValue encode
+  round-trip, connection-failure copy, Markdown tables, unadvertised
+  reasoning-effort rejection, unconnected admission, empty skill catalog
 - Repo: SECURITY.md, issue templates + chooser, CODEOWNERS, PR template,
   .editorconfig, .gitattributes, CONTRIBUTING/PRODUCT/README updates
 - CI: manual `workflow_dispatch` on build and release, cancel-in-progress
-  on build, artifact retention documented
+  on build, artifact retention documented, build-status badge in README
+- Fixed: EINTR from a terminated child flaked the verify-dmg step after all
+  checks passed — its final echo is now non-fatal
 - Fixed: a flaky workspace-store check that raced ModelHost's delayed
   terminal failure (now polls with `waitUntil`)
 
