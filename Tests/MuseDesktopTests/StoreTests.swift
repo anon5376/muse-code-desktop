@@ -327,6 +327,18 @@ enum StoreTests {
                 if fixtureStore.pendingRequests.first?.id == "question:q-m" {
                     print("PASS deciding one request leaves the other docked")
                 } else { failures += 1; print("FAIL wrong request remained: \(fixtureStore.pendingRequests.map(\.id))") }
+                // Streamed turn: deltas fold into the item; usage counters and
+                // activeTurn land/clear through the event handler.
+                fixtureStore.newSession(); fixtureStore.draft = "stream demo"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.current?.lastDuration != nil }
+                if let state = fixtureStore.current,
+                   state.transcript.items.first(where: { $0.id == "m-stream" })?.text == "Hello world",
+                   state.lastDuration == 321, state.totalTokens == 1234,
+                   state.contextUsed == 55, state.contextWindow == 200_000,
+                   state.activeTurn == nil, !fixtureStore.isRunning {
+                    print("PASS streamed turn folds items, usage, and turn state")
+                } else { failures += 1; print("FAIL stream fold: \(fixtureStore.current?.lastDuration ?? -1) \(fixtureStore.isRunning)") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
