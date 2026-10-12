@@ -32,3 +32,9 @@ the app never answers them for you.
 ⌘K opens the palette (sessions, skills, commands). The inspector beside the
 transcript holds Files · Activity · Skills · Session. The library (sidebar)
 lists durable sessions for resume.
+
+## Keep reading
+
+[architecture.md](architecture.md) explains the moving parts,
+[protocol.md](protocol.md) the wire contract, [fixtures.md](fixtures.md)
+the synthetic hosts, and [glossary.md](glossary.md) the shared vocabulary.
