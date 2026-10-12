@@ -282,6 +282,20 @@ enum StoreTests {
                         print("PASS background turn failures stay with their session and reappear on selection")
                     } else { failures += 1; print("FAIL session navigation lost or misrouted a terminal failure") }
                 }
+                // Pending-request beat: the fixture emits approval/requested
+                // mid-turn; the store docks it, and approval/decide clears it.
+                fixtureStore.newSession(); fixtureStore.draft = "pending approval check"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.pendingRequests.count == 1 }
+                if let pending = fixtureStore.pendingRequests.first,
+                   pending.id == "approval:appr-1", !pending.question {
+                    print("PASS approval request docks in arrival order")
+                } else { failures += 1; print("FAIL approval request did not dock: \(fixtureStore.pendingRequests.map(\.id))") }
+                if let pending = fixtureStore.pendingRequests.first {
+                    fixtureStore.decide(pending.request, .object(["choiceId": .string("allow")]))
+                }
+                try await waitUntil { fixtureStore.pendingRequests.isEmpty }
+                print("PASS approval/decide clears the pending request")
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
