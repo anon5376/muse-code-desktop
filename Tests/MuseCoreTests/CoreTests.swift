@@ -33,6 +33,7 @@ enum CoreTests {
             ("transcript ignores revisions that do not advance", testTranscriptRejectsStaleRevisions),
             ("approval falls back to tool/socket/process subjects", testApprovalFallbackKinds),
             ("transcript rejects non-text fields and replayed cursors", testTranscriptDeltaFieldWhitelist),
+            ("JSONValue survives an encode/decode round trip", testJSONValueCodableRoundTrip),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -497,6 +498,18 @@ enum CoreTests {
         }
     }
 
+
+    static func testJSONValueCodableRoundTrip() throws {
+        let value: JSONValue = .object([
+            "s": .string("text"), "n": .number(4.5), "b": .bool(true),
+            "a": .array([.number(1), .null]), "o": .object(["k": .string("v")]), "z": .null])
+        let data = try JSONEncoder().encode(value)
+        try equal(try JSONDecoder().decode(JSONValue.self, from: data), value)
+        // prettyPrinted stays parseable — approvals fall back to it verbatim.
+        let pretty = value.prettyPrinted
+        try equal(try JSONDecoder().decode(JSONValue.self, from: Data(pretty.utf8)), value)
+        try equal(pretty.contains("\n"), true)
+    }
 
     static func testJSONValueAccessors() throws {
         // Subscripting a non-object and missing keys both stay `.null` —
