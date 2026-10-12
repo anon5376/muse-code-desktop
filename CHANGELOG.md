@@ -42,6 +42,11 @@ Documentation and test hardening only — no product behavior changed.
   the 1 MiB draft cap, and the Files-inspector scan/preview/mention chain
 - Store: `states` is now `private(set)` so tests can observe session
   transitions
+- Fixture additions since: `fail/action`, `upsert/action`, `track/action`,
+  `subagent/readResult`, the refused `reject-m` route (goal-guard path),
+  `fixture-skill` in the skill catalog, and per-session draft restore,
+  toggle exclusivity, `useDefaultModel`, `chooseReasoning`/`setModel`,
+  `refreshPlugins` failure, and `reconnect` coverage
 
 ## [v0.1.0] — 2026-10-08 ([release](https://github.com/anon5376/muse-code-desktop/releases/tag/v0.1.0))
 Initial public preview (prerelease).
