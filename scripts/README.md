@@ -10,7 +10,7 @@ resolves the repo root itself. Caches stay inside `.build/` via
 | `test.sh` | Core + workspace test suites |
 | `test-workspace.sh` | Workspace store tests only (ModelHost fixture) |
 | `swift-local.sh` | `swift` wrapper keeping module/package caches in `.build/` |
-| `package-dmg.sh` | Build a reproducible DMG + `.sha256` in `build/dist/` |
+| `package-dmg.sh` | Build a checksummed DMG + `.sha256` in `build/dist/` |
 | `verify-dmg.sh` | Mount, install, launch-verify a DMG; checks missing-CLI path |
 | `capture-demo.sh` | Drive the app against ReviewHost and capture window frames |
 | `demo-drive.swift` | Input-driving helper used by `capture-demo.sh` |
