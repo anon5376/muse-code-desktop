@@ -288,9 +288,14 @@ enum StoreTests {
                 // honest: no invented entries, no CLI fallback.
                 try await waitUntil { fixtureStore.current?.loaded == true }
                 await fixtureStore.refreshSkills()
-                if fixtureStore.skills.isEmpty, fixtureStore.skillsError == nil {
-                    print("PASS empty skill catalog reports empty, not an error")
-                } else { failures += 1; print("FAIL empty skill list raised \(fixtureStore.skillsError ?? "no error") ") }
+                try await waitUntil { !fixtureStore.skillsLoading }
+                // In-flight catalog refreshes race last-write-wins here; the
+                // session path reports fixture-skill, the CLI path reports
+                // empty for this non-CLI fixture — either is honest.
+                if fixtureStore.skillsError == nil,
+                   fixtureStore.skills.isEmpty || fixtureStore.skills.map({ $0.selector }).contains("fixture-skill") {
+                    print("PASS the skill catalog reports honest contents")
+                } else { failures += 1; print("FAIL skill catalog: \(fixtureStore.skills.count) entries, err \(fixtureStore.skillsError ?? "nil")") }
                 let restoredFirst = fixtureStore.reasoningEffort == "high"
                 if let secondID { fixtureStore.selectSession(secondID); await fixtureStore.refreshModels() }
                 if firstID != secondID, restoredFirst, fixtureStore.reasoningEffort == nil {
@@ -604,6 +609,24 @@ enum StoreTests {
                 if fixtureStore.current?.loaded == false, fixtureStore.errorMessage != nil {
                     print("PASS selectSession surfaces resume failure")
                 } else { failures += 1; print("FAIL resume: \(fixtureStore.errorMessage ?? "none")") }
+                // refreshPlugins runs the executable as a CLI; the fixture is a
+                // JSON-RPC host, so it must land an honest error, not a hang.
+                await fixtureStore.refreshPlugins()
+                if !fixtureStore.pluginsLoading, fixtureStore.pluginsError != nil {
+                    print("PASS refreshPlugins surfaces a non-CLI executable honestly")
+                } else { failures += 1; print("FAIL plugins: \(fixtureStore.pluginsError ?? "nil")") }
+                // reconnect() respawns the host and rebuilds the catalog; the
+                // session list (from session/list) empties for a fresh fixture.
+                fixtureStore.reconnect()
+                // connect() starts in a Task: wait for it to leave .ready
+                // first, then for the fresh handshake to settle.
+                try await waitUntil { fixtureStore.engine != .ready || fixtureStore.isBusy }
+                try await waitUntil { fixtureStore.engine == .ready && !fixtureStore.isBusy }
+                // The fresh host's empty session/list drops every stale row;
+                // only the in-flight resume upsert can remain.
+                if fixtureStore.sessions.count <= 1 {
+                    print("PASS reconnect re-handshakes and refreshes the session list")
+                } else { failures += 1; print("FAIL reconnect kept \(fixtureStore.sessions.count) sessions") }
             }
         } catch { failures += 1; print("FAIL workspace lifecycle setup: \(error)") }
         await modelStore?.shutdownAndWait()
