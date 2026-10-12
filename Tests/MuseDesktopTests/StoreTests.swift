@@ -496,6 +496,22 @@ enum StoreTests {
                     print("PASS noop actions surface their reason")
                 } else { failures += 1; print("FAIL notice: \(fixtureStore.actionNotice ?? "nil")") }
                 fixtureStore.actionNotice = nil
+                // Files inspector: scan -> preview -> mention all land on the store.
+                let probe = root.appendingPathComponent("probe-file.txt")
+                try "probe body".write(to: probe, atomically: true, encoding: .utf8)
+                fixtureStore.refreshFiles()
+                try await waitUntil { fixtureStore.fileNodes.contains(where: { $0.url.lastPathComponent == "probe-file.txt" }) }
+                fixtureStore.previewFile(probe)
+                try await waitUntil { fixtureStore.filePreview != nil }
+                if fixtureStore.filePreview?.relativePath == "probe-file.txt" {
+                    print("PASS preview resolves the workspace-relative path")
+                } else { failures += 1; print("FAIL preview: \(fixtureStore.filePreview?.relativePath ?? "nil")") }
+                fixtureStore.draft = ""
+                fixtureStore.mentionFile()
+                if fixtureStore.draft == "@probe-file.txt " {
+                    print("PASS mention inserts the @path")
+                } else { failures += 1; print("FAIL mention: \(fixtureStore.draft)") }
+                fixtureStore.draft = ""
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
