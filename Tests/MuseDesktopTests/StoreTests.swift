@@ -100,6 +100,13 @@ enum StoreTests {
                 if titled.title == "Real title", empty.title == "New session", untitled.title == "New session", untitled.id == "s3" {
                     print("PASS session summaries never show a blank title")
                 } else { failures += 1; print("FAIL session summary title fallback") }
+                // Title precedence: title > name > firstUserPrompt.
+                let named = SessionSummary(.object(["sessionId": .string("s4"), "name": .string("Named")]))
+                let prompted = SessionSummary(.object(["sessionId": .string("s5"), "firstUserPrompt": .string("asked something")]))
+                let both = SessionSummary(.object(["sessionId": .string("s6"), "title": .string("T"), "name": .string("N"), "firstUserPrompt": .string("P")]))
+                if named.title == "Named", prompted.title == "asked something", both.title == "T" {
+                    print("PASS summary titles prefer title, then name, then firstUserPrompt")
+                } else { failures += 1; print("FAIL summary title precedence: \(named.title)|\(prompted.title)|\(both.title)") }
             }
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
             // FileBrowser.scan: omitted dirs, symlinks and hidden files are
