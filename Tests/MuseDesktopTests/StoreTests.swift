@@ -464,8 +464,10 @@ enum StoreTests {
                 } else { failures += 1; print("FAIL oversize: \(fixtureStore.errorMessage ?? "nil")") }
                 fixtureStore.draft = ""; fixtureStore.errorMessage = nil
                 // session/fork upserts + selects the fork and restores its history.
+                print("DIAG pre-fork canFork \(fixtureStore.canForkSession) canRun \(fixtureStore.canRunGoal) busy \(fixtureStore.isBusy) running \(fixtureStore.isRunning) loaded \(fixtureStore.current?.loaded ?? false) unavail \(fixtureStore.current?.unavailable ?? false) sel \(fixtureStore.selectedID ?? "nil")")
                 fixtureStore.forkSession()
-                try await waitUntil { fixtureStore.selectedID == "fork-1" }
+                try await waitUntil { fixtureStore.selectedID == "fork-1" || fixtureStore.actionError != nil }
+                print("DIAG post-fork sel \(fixtureStore.selectedID ?? "nil") err \(fixtureStore.actionError ?? "nil") notice \(fixtureStore.actionNotice ?? "nil")")
                 try await waitUntil { !fixtureStore.isBusy && fixtureStore.current?.loaded == true }
                 if fixtureStore.sessions.contains(where: { $0.id == "fork-1" }),
                    fixtureStore.current?.transcript.items.contains(where: { $0.id == "f-1" && $0.text == "forked history" }) == true {
