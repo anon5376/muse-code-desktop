@@ -35,6 +35,7 @@ enum CoreTests {
             ("transcript rejects non-text fields and replayed cursors", testTranscriptDeltaFieldWhitelist),
             ("JSONValue survives an encode/decode round trip", testJSONValueCodableRoundTrip),
             ("connection failures carry actionable descriptions", testConnectionFailureCopy),
+            ("Markdown groups pipe tables and keeps non-tables literal", testMarkdownTables),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -499,6 +500,17 @@ enum CoreTests {
         }
     }
 
+
+    static func testMarkdownTables() throws {
+        let table = MarkdownBlocks.parse("a | b\n---: | :---\n 1 | 2 \n3|4\n\nafter", isStreaming: false)
+        try equal(table, [.table(headers: ["a", "b"], rows: [["1", "2"], ["3", "4"]]), .paragraph("after")])
+        // A pipe line with no divider row below stays a paragraph.
+        let notTable = MarkdownBlocks.parse("a | b\nno divider", isStreaming: false)
+        try equal(notTable, [.paragraph("a | b\nno divider")])
+        // Headings need whitespace after the hashes.
+        let notHeading = MarkdownBlocks.parse("##nospace\n", isStreaming: false)
+        try equal(notHeading, [.paragraph("##nospace")])
+    }
 
     static func testConnectionFailureCopy() throws {
         try equal(ConnectionFailure.notRunning.errorDescription?.contains("Reconnect"), true)
