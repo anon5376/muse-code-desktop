@@ -455,7 +455,7 @@ enum StoreTests {
                 } else { failures += 1; print("FAIL attention: \(fixtureStore.attentionCount("extra-r")) \(fixtureStore.otherAttentionSession?.id ?? "nil")") }
                 // A draft over 1 MiB is refused honestly, not sent.
                 fixtureStore.newSession()
-                try await waitUntil { fixtureStore.current?.loaded == true }
+                try await waitUntil { fixtureStore.modelExecutionReady }
                 fixtureStore.draft = String(repeating: "x", count: 1_048_577)
                 fixtureStore.send()
                 try await waitUntil { fixtureStore.errorMessage != nil }
