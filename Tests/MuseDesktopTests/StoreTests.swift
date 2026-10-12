@@ -288,9 +288,9 @@ enum StoreTests {
                 // honest: no invented entries, no CLI fallback.
                 try await waitUntil { fixtureStore.current?.loaded == true }
                 await fixtureStore.refreshSkills()
-                if fixtureStore.skills.isEmpty, fixtureStore.skillsError == nil {
-                    print("PASS empty skill catalog reports empty, not an error")
-                } else { failures += 1; print("FAIL empty skill list raised \(fixtureStore.skillsError ?? "no error") ") }
+                if fixtureStore.skills.map({ $0.selector }).contains("fixture-skill"), fixtureStore.skillsError == nil {
+                    print("PASS the session skill catalog carries the fixture skill")
+                } else { failures += 1; print("FAIL skill catalog: \(fixtureStore.skills.count) entries, err \(fixtureStore.skillsError ?? "nil")") }
                 let restoredFirst = fixtureStore.reasoningEffort == "high"
                 if let secondID { fixtureStore.selectSession(secondID); await fixtureStore.refreshModels() }
                 if firstID != secondID, restoredFirst, fixtureStore.reasoningEffort == nil {
