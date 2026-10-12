@@ -424,16 +424,20 @@ enum StoreTests {
                     print("PASS events for another session stay out of the selected state")
                 } else { failures += 1; print("FAIL isolation: live \(liveCount) selected \(fixtureStore.selectedID ?? "nil")") }
                 // A turn on another session shows as background activity only.
-                fixtureStore.newSession(); fixtureStore.draft = "background activity"
+                fixtureStore.newSession(); fixtureStore.draft = "background start"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
-                // Events land in one batch; the completed event may already have cleared.
-                if fixtureStore.sessionIsRunning("extra-r") == false,
+                try await waitUntil { fixtureStore.sessionIsRunning("extra-r") }
+                if fixtureStore.anyRunning, !fixtureStore.isRunning,
                    fixtureStore.current?.activeTurn == nil {
-                    print("PASS completed background turn leaves no activity")
-                } else { failures += 1; print("FAIL background activity stuck") }
-                if fixtureStore.states["extra-r"]?.completedTurns.contains("bg-1") == true {
-                    print("PASS background turn recorded as completed")
-                } else { failures += 1; print("FAIL completedTurns missing bg-1") }
+                    print("PASS a background turn shows via anyRunning only")
+                } else { failures += 1; print("FAIL background start: any \(fixtureStore.anyRunning) live \(fixtureStore.isRunning)") }
+                fixtureStore.newSession(); fixtureStore.draft = "background stop"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { !fixtureStore.sessionIsRunning("extra-r") }
+                if fixtureStore.states["extra-r"]?.completedTurns.contains("bg-1") == true,
+                   fixtureStore.states["extra-r"]?.activeTurn == nil {
+                    print("PASS background turn completes into completedTurns")
+                } else { failures += 1; print("FAIL background stop") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
