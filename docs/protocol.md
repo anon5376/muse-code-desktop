@@ -72,3 +72,9 @@ travels on `approval/decide` / `userInput/answer`, never on that reply.
 unbounded), or `freeText` — capped at 500 scalars — when no option is picked.
 Every selected label must come from the question's `options`; anything else
 is refused client-side and never reaches the wire.
+
+The Activity inspector fires ad-hoc methods the host may implement
+(`noop/action` in the fixtures stands in for the family). A result of
+`{"status": "noop", "reason": "<why>"}` means "already done" and renders
+the reason as a notice; any other success reads as a generic acceptance,
+and a JSON-RPC error surfaces as the row's error text.
