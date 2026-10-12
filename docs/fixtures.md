@@ -24,6 +24,11 @@ Workspace-store fixture used by `scripts/test-workspace.sh`:
 - a deliberately delayed terminal failure (`asyncAfter` ~200 ms) that drove
   a real flake when a test used a fixed `Task.sleep` — store tests now poll
   with `waitUntil`
+- input-driven beats: `reject once then retry` fails `turn/start` once with
+  `-32602` then accepts the retry; `delayed terminal failure` accepts, emits
+  `turn/started`, then `turn/completed` ~200 ms later; any input containing
+  `explicit model` is rejected unless `reasoningEffort: "high"` accompanies
+  it
 
 ## Adding a beat
 
