@@ -11,6 +11,7 @@
 | [onboarding.md](onboarding.md) | First-run walkthrough: CLI → DMG → echo mode → first session |
 | [compatibility.md](compatibility.md) | Platform, CLI, and toolchain requirements |
 | [launch-flags.md](launch-flags.md) | `--echo` / `--workspace` / `--muse-executable` launch arguments |
+| [glossary.md](glossary.md) | Protocol and design terms defined once |
 | [ci.md](ci.md) | Workflow triggers, artifacts, and concurrency rules |
 | [releasing.md](releasing.md) | Tag-driven release runbook and re-release procedure |
 | [uiux-review.md](uiux-review.md) | Interactive UI/UX review from a real macOS session |
