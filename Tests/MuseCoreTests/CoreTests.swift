@@ -36,6 +36,8 @@ enum CoreTests {
             ("JSONValue survives an encode/decode round trip", testJSONValueCodableRoundTrip),
             ("connection failures carry actionable descriptions", testConnectionFailureCopy),
             ("Markdown groups pipe tables and keeps non-tables literal", testMarkdownTables),
+            ("item deltas obey the active gate and per-item cursors", testTranscriptDeltaActiveGate),
+            ("Markdown fence run lengths and list spacing", testMarkdownFenceRuns),
             ("transcript restore replaces items and delta cursors", testTranscriptRestoreResets),
             ("prettyPrinted sorts object keys", testPrettyPrintedSortedKeys),
             ("transcript items read honest fallbacks", testTranscriptItemFallbacks),
@@ -504,6 +506,57 @@ enum CoreTests {
         }
     }
 
+
+    static func testTranscriptDeltaActiveGate() throws {
+        var t = Transcript()
+        // A completed item ignores further deltas.
+        _ = t.apply(.object(["method": .string("item/updated"), "params": .object([
+            "item": .object(["itemId": .string("done"), "status": .string("completed"),
+                             "revision": .number(1), "text": .string("final")])])]))
+        try equal(t.apply(.object(["method": .string("item/delta"), "params": .object([
+            "itemId": .string("done"), "delta": .string(" more")])])), false)
+        try equal(t.items[0].text, "final")
+        // viewCursor dedup is per item: the same cursor on another item applies.
+        func live(_ t: inout Transcript, _ id: String) {
+            _ = t.apply(.object(["method": .string("item/started"), "params": .object([
+                "item": .object(["itemId": .string(id), "status": .string("inProgress"),
+                                 "revision": .number(1)])])]))
+        }
+        live(&t, "a"); live(&t, "b")
+        func delta(_ id: String, _ text: String, _ cursor: String) -> JSONValue {
+            .object(["method": .string("item/delta"), "params": .object([
+                "itemId": .string(id), "delta": .string(text), "viewCursor": .string(cursor)])])
+        }
+        try equal(t.apply(delta("a", "1", "c")), true)
+        try equal(t.apply(delta("b", "2", "c")), true)   // same cursor, different item
+        try equal(t.apply(delta("a", "x", "c")), false)  // replayed on item a
+        // An item without an id can never land.
+        try equal(t.apply(.object(["method": .string("item/updated"), "params": .object([
+            "item": .object(["status": .string("completed"), "revision": .number(1)])])])), false)
+        // A higher revision replaces the row in place, keeping its position.
+        _ = t.apply(.object(["method": .string("item/updated"), "params": .object([
+            "item": .object(["itemId": .string("b"), "status": .string("completed"),
+                             "revision": .number(9), "text": .string("B")])])]))
+        try equal(t.items.map(\.id), ["done", "a", "b"])
+        try equal(t.items[2].text, "B")
+    }
+
+    static func testMarkdownFenceRuns() throws {
+        // A closing run must be at least as long as the opener; shorter runs are content.
+        try equal(MarkdownBlocks.parse("````\n``` inside\nbody\n````"), [
+            .code(language: "", text: "``` inside\nbody")])
+        // A longer run closes a shorter opener.
+        try equal(MarkdownBlocks.parse("```\nx\n````"), [.code(language: "", text: "x")])
+        // The info string after the fence is the language, verbatim.
+        try equal(MarkdownBlocks.parse("```swift ui\nx\n```"), [.code(language: "swift ui", text: "x")])
+        // List markers need whitespace after them.
+        try equal(MarkdownBlocks.parse("1.x\n-x"), [.paragraph("1.x\n-x")])
+        // Table rows may be wider or narrower than the header; cells split verbatim.
+        try equal(MarkdownBlocks.parse("a | b\n--- | ---\n1 | 2 | 3\n4"), [
+            .table(headers: ["a", "b"], rows: [["1", "2", "3"]]), .paragraph("4")])
+        // A paragraph yields to a list mid-run.
+        try equal(MarkdownBlocks.parse("intro\n- item"), [.paragraph("intro"), .listItem(marker: "•", text: "item", indent: 0)])
+    }
 
     static func testMarkdownTables() throws {
         let table = MarkdownBlocks.parse("a | b\n---: | :---\n 1 | 2 \n3|4\n\nafter", isStreaming: false)
