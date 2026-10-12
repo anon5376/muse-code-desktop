@@ -36,6 +36,8 @@ enum CoreTests {
             ("JSONValue survives an encode/decode round trip", testJSONValueCodableRoundTrip),
             ("connection failures carry actionable descriptions", testConnectionFailureCopy),
             ("Markdown groups pipe tables and keeps non-tables literal", testMarkdownTables),
+            ("transcript restore replaces items and delta cursors", testTranscriptRestoreResets),
+            ("prettyPrinted sorts object keys", testPrettyPrintedSortedKeys),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -520,6 +522,36 @@ enum CoreTests {
         // The rpc case truncates a host message at 2,000 scalars.
         let long = String(repeating: "x", count: 3_000)
         try equal(ConnectionFailure.rpc(-1, long, nil).errorDescription?.count, 2_000)
+    }
+
+    static func testTranscriptRestoreResets() throws {
+        var transcript = Transcript()
+        func note(_ item: JSONValue) -> JSONValue {
+            .object(["method": .string("item/updated"), "params": .object(["item": item])])
+        }
+        func item(_ id: String, _ rev: Int) -> JSONValue {
+            .object(["itemId": .string(id), "kind": .string("agentMessage"),
+                "status": .string("inProgress"), "revision": .number(Double(rev)), "text": .string("x")])
+        }
+        _ = transcript.apply(note(item("old", 9)))
+        // A delta on "old" leaves a cursor that must not survive restore.
+        _ = transcript.apply(.object(["method": .string("item/delta"), "params": .object([
+            "itemId": .string("old"), "delta": .string("d"), "viewCursor": .string("c1")])]))
+        transcript.restore([item("new", 1)])
+        try equal(transcript.items.count, 1)
+        try equal(transcript.items[0].id, "new")
+        // Restore is wholesale: the old item's cursor is gone, so a delta
+        // addressed to it is unknown and ignored.
+        try equal(transcript.apply(.object(["method": .string("item/delta"), "params": .object([
+            "itemId": .string("old"), "delta": .string("d"), "viewCursor": .string("c1")])])), false)
+    }
+
+    static func testPrettyPrintedSortedKeys() throws {
+        let pretty = JSONValue.object(["b": .number(1), "a": .number(2)]).prettyPrinted
+        guard let aRange = pretty.range(of: "\"a\""), let bRange = pretty.range(of: "\"b\"") else {
+            throw Failure(description: "prettyPrinted dropped keys")
+        }
+        try equal(aRange.lowerBound < bRange.lowerBound, true)
     }
 
     static func testJSONValueCodableRoundTrip() throws {
