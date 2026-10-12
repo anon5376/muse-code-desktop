@@ -16,6 +16,8 @@ var active = false
 var sessionNumber = 0
 var sessionID = "model-ordering-session-0"
 var lastWorkspace = ""
+var lastInputType = ""
+var lastSkillSelector = ""
 var rejectedFirstSubmission = false
 while let line = readLine(), let bytes = line.data(using: .utf8),
       let request = try? JSONSerialization.jsonObject(with: bytes) as? [String: Any] {
@@ -26,7 +28,7 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     switch method {
     case "initialize": result = ["schema": ["version": 1], "serverInfo": ["version": "test-fixture"]]
     case "session/list": result = ["sessions": []]
-    case "skill/list": result = ["skills": []]
+    case "skill/list": result = ["skills": [["selector": "fixture-skill", "name": "Fixture skill", "activation": "on"]]]
     case "model/list":
         if active { Thread.sleep(forTimeInterval: 0.08) }
         result = ["models": [["modelId": "fixture-model", "providerId": "fixture", "profileId": "personal", "variants": ["high"], "isDefault": true, "isActive": params["sessionId"] != nil]], "source": "fakeCatalog"]
@@ -70,6 +72,8 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
         result = ["status": "accepted"]
     case "turn/start":
         let input = params["input"] as? [[String: Any]] ?? []
+        lastInputType = input.first?["type"] as? String ?? ""
+        lastSkillSelector = input.first?["selector"] as? String ?? ""
         if (input.first?["text"] as? String) == "reject once then retry", !rejectedFirstSubmission {
             rejectedFirstSubmission = true
             writeFrame(["jsonrpc": "2.0", "id": id, "error": ["code": -32602, "message": "Synthetic first admission failure"]])
