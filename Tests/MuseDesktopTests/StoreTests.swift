@@ -243,6 +243,7 @@ enum StoreTests {
                 fixtureStore.selectSession(firstID); await fixtureStore.refreshModels()
                 // With a loaded session the fixture's empty skill/list is
                 // honest: no invented entries, no CLI fallback.
+                try await waitUntil { fixtureStore.current?.loaded == true }
                 await fixtureStore.refreshSkills()
                 if fixtureStore.skills.isEmpty, fixtureStore.skillsError == nil {
                     print("PASS empty skill catalog reports empty, not an error")
