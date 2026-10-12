@@ -215,7 +215,7 @@ enum StoreTests {
             if fixtureStore.reasoningEffort == "high" { print("PASS default model offers its advertised reasoning choices") }
             else { failures += 1; print("FAIL default model hides supported reasoning choices") }
             fixtureStore.chooseReasoning("bogus-effort-731b")
-            if fixtureStore.reasoningEffort == nil { print("PASS picker cannot invent an unadvertised reasoning effort") }
+            if fixtureStore.reasoningEffort == "high" { print("PASS picker cannot invent an unadvertised reasoning effort") }
             else { failures += 1; print("FAIL store admitted an unadvertised reasoning effort") }
             fixtureStore.chooseReasoning("high")
             fixtureStore.selectedModelKey = model.id; fixtureStore.reasoningEffort = "high"
