@@ -98,4 +98,6 @@
 The working tree contains one **uncommitted demonstration fix** for finding 1 (`Sources/MuseDesktop/LibraryView.swift`, `.id(entry.id)` + bounds-checked `scrollTo`). No commits, pushes, or PRs were made.
 
 ## Screenshots
-`docs/review-shots/`: 01 workspace home · 02 palette · 03 transcript markdown · 04 approval card · 05 question card · 06 model picker · 07 skills tab · 08 file preview · 09 home continue row · 10 min-size layout · 11 settings self-test failure · 12 composer + menu · 13 palette in-session · 14 session transcript.
+The reviewer's full-resolution captures live in its Devin session (not
+committed). Committed app captures are catalogued in [media/](media/README.md).
+`docs/review-shots/` on that session held: 01 workspace home · 02 palette · 03 transcript markdown · 04 approval card · 05 question card · 06 model picker · 07 skills tab · 08 file preview · 09 home continue row · 10 min-size layout · 11 settings self-test failure · 12 composer + menu · 13 palette in-session · 14 session transcript.
