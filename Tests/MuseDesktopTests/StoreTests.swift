@@ -413,6 +413,16 @@ enum StoreTests {
                    fixtureStore.sessions.first(where: { $0.id == "extra-s" })?.title == "Extra" {
                     print("PASS upsert guards keep the session list honest")
                 } else { failures += 1; print("FAIL upsert: \(fixtureStore.sessions.map(\.id))") }
+                // Events keyed to another session stay in that session's state.
+                fixtureStore.newSession(); fixtureStore.draft = "isolation demo"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.states["extra-r"]?.approvals["appr-iso"] != nil }
+                let liveCount = fixtureStore.current?.transcript.items.count ?? -1
+                if fixtureStore.pendingRequests.isEmpty,
+                   fixtureStore.current?.transcript.items.contains(where: { $0.id == "iso-1" }) != true,
+                   fixtureStore.states["extra-r"]?.transcript.items.contains(where: { $0.id == "iso-1" }) == true {
+                    print("PASS events for another session stay out of the selected state")
+                } else { failures += 1; print("FAIL isolation: live \(liveCount) selected \(fixtureStore.selectedID ?? "nil")") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {

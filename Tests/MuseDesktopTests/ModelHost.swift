@@ -82,6 +82,11 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             event("userInput/requested", ["sessionId": target, "userInputId": "q-1",
                 "question": ["id": "q", "selection": ["mode": "single"], "options": [["label": "A"], ["label": "B"]]]])
         }
+        if (input.first?["text"] as? String) == "isolation demo" {
+            event("item/updated", ["sessionId": "extra-r", "item": ["itemId": "iso-1", "kind": "agentMessage", "status": "completed", "revision": 1, "text": "belongs to extra-r"]])
+            event("approval/requested", ["sessionId": "extra-r", "approvalId": "appr-iso",
+                "subject": ["kind": "shell", "command": "echo hi"]])
+        }
         if (input.first?["text"] as? String) == "session list hygiene" {
             event("session/started", ["session": ["sessionId": "other-ws", "title": "Foreign", "workspaceRoot": "/nonexistent"]])
             event("session/started", ["session": ["sessionId": "extra-s", "title": "New session", "workspaceRoot": lastWorkspace]])
