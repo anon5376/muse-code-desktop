@@ -16,8 +16,6 @@ var active = false
 var sessionNumber = 0
 var sessionID = "model-ordering-session-0"
 var lastWorkspace = ""
-var lastInputType = ""
-var lastSkillSelector = ""
 var rejectedFirstSubmission = false
 while let line = readLine(), let bytes = line.data(using: .utf8),
       let request = try? JSONSerialization.jsonObject(with: bytes) as? [String: Any] {
@@ -72,8 +70,7 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
         result = ["status": "accepted"]
     case "turn/start":
         let input = params["input"] as? [[String: Any]] ?? []
-        lastInputType = input.first?["type"] as? String ?? ""
-        lastSkillSelector = input.first?["selector"] as? String ?? ""
+
         if (input.first?["text"] as? String) == "reject once then retry", !rejectedFirstSubmission {
             rejectedFirstSubmission = true
             writeFrame(["jsonrpc": "2.0", "id": id, "error": ["code": -32602, "message": "Synthetic first admission failure"]])
@@ -158,7 +155,11 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             event("approval/requested", ["sessionId": target, "approvalId": "appr-1", "currentRequirementId": "req-1",
                 "subject": ["kind": "shell", "command": "ls -la"]])
         }
-        event("item/completed", ["sessionId": params["sessionId"] ?? sessionID, "item": ["itemId": "confirmed-effort-" + turnID, "kind": "agentMessage", "status": "completed", "revision": 1, "text": "Requested reasoning: \(params["reasoningEffort"] as? String ?? "default")"]])
+        if input.first?["type"] as? String == "skill" {
+            event("item/completed", ["sessionId": params["sessionId"] ?? sessionID, "item": ["itemId": "skill-" + turnID, "kind": "agentMessage", "status": "completed", "revision": 1, "text": "Skill invoked: \(input.first?["selector"] as? String ?? "")"]])
+        } else {
+            event("item/completed", ["sessionId": params["sessionId"] ?? sessionID, "item": ["itemId": "confirmed-effort-" + turnID, "kind": "agentMessage", "status": "completed", "revision": 1, "text": "Requested reasoning: \(params["reasoningEffort"] as? String ?? "default")"]])
+        }
         event("turn/completed", ["sessionId": params["sessionId"] ?? sessionID, "turnId": turnID, "terminal": "completed", "durationMs": 321])
     default: break
     }

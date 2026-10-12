@@ -517,10 +517,11 @@ enum StoreTests {
                 fixtureStore.chooseSkill(SkillEntry(raw: .object(["selector": .string("fixture-skill"), "activation": .string("on")])))
                 fixtureStore.send()
                 try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
-                if fixtureStore.pendingSkill == nil, lastInputType == "skill",
-                   lastSkillSelector == "fixture-skill" {
+                try await waitUntil { fixtureStore.current?.transcript.items.contains(where: { $0.text.contains("Skill invoked:") }) == true }
+                if fixtureStore.pendingSkill == nil,
+                   fixtureStore.current?.transcript.items.contains(where: { $0.text == "Skill invoked: fixture-skill" }) == true {
                     print("PASS skill send submits the session-catalog selector")
-                } else { failures += 1; print("FAIL skill send: \(lastInputType) \(lastSkillSelector) pending \(fixtureStore.pendingSkill != nil)") }
+                } else { failures += 1; print("FAIL skill send pending \(fixtureStore.pendingSkill != nil)") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
