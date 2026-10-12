@@ -146,7 +146,7 @@ final class WorkspaceStore: ObservableObject {
     private var eventsTask: Task<Void, Never>?
     private var generation = UUID()
     private var selectionGeneration = UUID()
-    private var states: [String: SessionState] = [:]
+    var states: [String: SessionState] = [:]
     private var drafts: [String: String] = [:]
     private var newDraftReasoning: String?
     private var loading = Set<String>()
