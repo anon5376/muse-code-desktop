@@ -85,6 +85,8 @@ The interface is flat and content-led. Tonal surfaces and hairline dividers defi
 - Neutral charcoal surfaces, Muse blue for selection and focus, amber for user attention.
 - Transcript-first layout with optional session navigation and read-only inspection.
 
+Machine-readable tokens for tooling live in [.impeccable/design.json](.impeccable/design.json); this file is the human-readable contract.
+
 ## Colors
 
 Neutral charcoal carries the interface; blue identifies selection and focus, and amber identifies a decision or data-use notice.
