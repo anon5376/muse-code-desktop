@@ -427,7 +427,6 @@ enum StoreTests {
                 // the state lands unavailable with an error (send() is dead after this).
                 // Register buf-s in the list, then select it: its resume emits an
                 // item before the result, which must buffer until restore lands.
-                fixtureStore.selectSession(fixtureStore.selectedID!)  // no-op guard sanity
                 fixtureStore.newSession(); fixtureStore.draft = "session list hygiene"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
                 fixtureStore.selectSession("buf-s")
