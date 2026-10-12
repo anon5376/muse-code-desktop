@@ -624,6 +624,22 @@ enum StoreTests {
                 fixtureStore.newSession()
                 if fixtureStore.draft.isEmpty { print("PASS accepted retry consumes the draft owned by its created session") }
                 else { failures += 1; print("FAIL accepted retry resurrected its original new-session draft") }
+                // A failed session/setModel inside createSession leaves the
+                // session loaded with modelSelectionRequired -> goal actions
+                // are refused with an explanation instead of firing.
+                guard let reject = fixtureStore.models.first(where: { $0.modelID == "reject-m" }) else {
+                    throw Failure(description: "fixture catalog is missing reject-m")
+                }
+                fixtureStore.selectedModelKey = reject.id
+                fixtureStore.newSession(); fixtureStore.draft = "model refusal input"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
+                try await waitUntil { fixtureStore.errorMessage != nil }
+                fixtureStore.sessionAction("goal/set", label: "Goal", parameters: ["text": .string("x")])
+                if fixtureStore.actionError?.contains("model") == true {
+                    print("PASS a refused model route blocks goal actions with an explanation")
+                } else { failures += 1; print("FAIL goal guard: \(fixtureStore.actionError ?? "nil")") }
+                fixtureStore.actionError = nil; fixtureStore.errorMessage = nil
+                fixtureStore.selectedModelKey = ""
                 // Last: selecting a listed-but-unloaded session fails resume honestly —
                 // the fixture has no session/resume, so the missing history throws and
                 // the state lands unavailable with an error (send() is dead after this).
