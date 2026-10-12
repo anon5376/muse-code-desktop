@@ -366,8 +366,8 @@ enum StoreTests {
                 // statusChanged notLoaded invalidates the loaded session.
                 fixtureStore.newSession(); fixtureStore.draft = "notload demo"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
-                try await waitUntil { fixtureStore.current?.loaded == false }
-                if fixtureStore.current?.unavailable == true, fixtureStore.pendingRequests.isEmpty {
+                try await waitUntil { fixtureStore.current?.unavailable == true }
+                if fixtureStore.current?.loaded == false, fixtureStore.pendingRequests.isEmpty {
                     print("PASS notLoaded invalidates the session")
                 } else { failures += 1; print("FAIL notload: \(fixtureStore.current?.loaded ?? true)") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
