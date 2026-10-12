@@ -9,6 +9,8 @@ let package = Package(
         .executable(name: "MuseDiagnostics", targets: ["MuseDiagnostics"]),
         .executable(name: "MuseCoreTests", targets: ["MuseCoreTests"])
     ],
+    // StoreTests is intentionally not a target — scripts/test-workspace.sh
+    // compiles it with the fixture hosts (see docs/testing.md).
     targets: [
         .target(name: "MuseCore"),
         .executableTarget(name: "MuseDesktop", dependencies: ["MuseCore"],
