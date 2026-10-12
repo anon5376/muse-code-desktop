@@ -37,6 +37,10 @@ app only relies on what is listed here.
 | `session/approvalModeChanged` · `session/contextUsage` · `session/tokenUsage` | Posture and usage |
 | `session/viewHealthChanged` · `view/gap` | View integrity — a gap means refetch |
 | `skill/changed` | Live skill catalog updates |
+| `approval/request` / `approval/requested` | Permission card — both wire spellings accepted |
+| `approval/updated` · `approval/resolved` | Merge into / close a pending approval |
+| `userInput/request` / `userInput/requested` | Question card — both wire spellings accepted |
+| `userInput/settled` | Close a pending question |
 | `connection/closed` | Host exit/pipe closure |
 
 ## Framing, timeouts, and refusals
