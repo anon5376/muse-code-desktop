@@ -40,6 +40,18 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     case "approval/decide":
         result = ["status": "accepted"]
         event("approval/resolved", ["sessionId": params["sessionId"] ?? sessionID, "approvalId": params["approvalId"] ?? ""])
+    case "session/resume":
+        let target = params["sessionId"] as? String ?? ""
+        if target == "buf-s" {
+            // The event lands before the result so the store must buffer it.
+            event("item/updated", ["sessionId": target, "item": ["itemId": "buf-1", "kind": "agentMessage", "status": "completed", "revision": 1, "text": "buffered item"]])
+            let rid = id
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(150)) {
+                writeFrame(["jsonrpc": "2.0", "id": rid, "result": ["session": ["sessionId": target], "history": ["items": []]]])
+            }
+            continue
+        }
+        result = [:]
     case "session/setModel":
         active = true
         event("session/modelChanged", ["sessionId": params["sessionId"] ?? sessionID, "modelId": "fixture-model", "providerId": "fixture"])
