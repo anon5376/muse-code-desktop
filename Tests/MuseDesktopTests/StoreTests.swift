@@ -558,6 +558,24 @@ enum StoreTests {
                 if fixtureStore.selectedModelKey == "" {
                     print("PASS useDefaultModel clears the catalog selection")
                 } else { failures += 1; print("FAIL useDefaultModel: \(fixtureStore.selectedModelKey)") }
+                // Unsent drafts stash per session and restore on re-select.
+                fixtureStore.newSession()
+                fixtureStore.draft = "second session input"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.selectedID != nil && fixtureStore.selectedID != "fork-1" && fixtureStore.current?.loaded == true }
+                let secondID = fixtureStore.selectedID!
+                fixtureStore.draft = "unsent draft on second"
+                fixtureStore.selectSession("fork-1")
+                try await waitUntil { !fixtureStore.isBusy && fixtureStore.selectedID == "fork-1" && fixtureStore.current?.loaded == true }
+                if fixtureStore.draft != "unsent draft on second" {
+                    print("PASS selecting away stashes the draft")
+                } else { failures += 1; print("FAIL stash on select") }
+                fixtureStore.selectSession(secondID)
+                try await waitUntil { !fixtureStore.isBusy && fixtureStore.selectedID == secondID && fixtureStore.current?.loaded == true }
+                if fixtureStore.draft == "unsent draft on second" {
+                    print("PASS re-selecting restores the stashed draft")
+                } else { failures += 1; print("FAIL draft restore: \(fixtureStore.draft)") }
+                fixtureStore.draft = ""
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
