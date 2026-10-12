@@ -15,6 +15,7 @@ func event(_ method: String, _ params: [String: Any]) {
 var active = false
 var sessionNumber = 0
 var sessionID = "model-ordering-session-0"
+var lastWorkspace = ""
 var rejectedFirstSubmission = false
 while let line = readLine(), let bytes = line.data(using: .utf8),
       let request = try? JSONSerialization.jsonObject(with: bytes) as? [String: Any] {
@@ -31,6 +32,7 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
         result = ["models": [["modelId": "fixture-model", "providerId": "fixture", "profileId": "personal", "variants": ["high"], "isDefault": true, "isActive": params["sessionId"] != nil]], "source": "fakeCatalog"]
     case "session/start":
         sessionNumber += 1; sessionID = "model-ordering-session-\(sessionNumber)"; active = true
+        lastWorkspace = params["workspaceRoot"] as? String ?? ""
         result = ["session": ["sessionId": sessionID, "workspaceRoot": params["workspaceRoot"] ?? "", "modelId": "fixture-model", "providerId": "fixture"]]
     case "userInput/answer":
         result = ["status": "accepted"]
@@ -67,6 +69,15 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
         if (input.first?["text"] as? String) == "pending question check" {
             event("userInput/requested", ["sessionId": target, "userInputId": "q-1",
                 "question": ["id": "q", "selection": ["mode": "single"], "options": [["label": "A"], ["label": "B"]]]])
+        }
+        if (input.first?["text"] as? String) == "notification tail" {
+            event("approval/requested", ["sessionId": target, "approvalId": "appr-t",
+                "subject": ["kind": "shell", "command": "make x"]])
+            event("approval/updated", ["sessionId": target, "approvalId": "appr-t", "note": "v2"])
+            event("session/started", ["session": ["sessionId": "extra-s", "title": "Extra", "workspaceRoot": lastWorkspace]])
+        }
+        if (input.first?["text"] as? String) == "notload demo" {
+            event("session/statusChanged", ["sessionId": target, "status": "notLoaded"])
         }
         if (input.first?["text"] as? String) == "lifecycle demo" {
             event("session/modelChanged", ["sessionId": target, "modelId": "fixture-model", "providerId": "fixture-provider"])
