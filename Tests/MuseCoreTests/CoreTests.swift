@@ -34,6 +34,7 @@ enum CoreTests {
             ("approval falls back to tool/socket/process subjects", testApprovalFallbackKinds),
             ("transcript rejects non-text fields and replayed cursors", testTranscriptDeltaFieldWhitelist),
             ("JSONValue survives an encode/decode round trip", testJSONValueCodableRoundTrip),
+            ("connection failures carry actionable descriptions", testConnectionFailureCopy),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -498,6 +499,16 @@ enum CoreTests {
         }
     }
 
+
+    static func testConnectionFailureCopy() throws {
+        try equal(ConnectionFailure.notRunning.errorDescription?.contains("Reconnect"), true)
+        try equal(ConnectionFailure.timeout("session/load").errorDescription?.contains("session/load"), true)
+        try equal(ConnectionFailure.hostExit(42).errorDescription?.contains("42"), true)
+        try equal(ConnectionFailure.protocolError("bad frame").errorDescription?.contains("bad frame"), true)
+        // The rpc case truncates a host message at 2,000 scalars.
+        let long = String(repeating: "x", count: 3_000)
+        try equal(ConnectionFailure.rpc(-1, long, nil).errorDescription?.count, 2_000)
+    }
 
     static func testJSONValueCodableRoundTrip() throws {
         let value: JSONValue = .object([
