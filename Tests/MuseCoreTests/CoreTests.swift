@@ -502,13 +502,13 @@ enum CoreTests {
 
 
     static func testMarkdownTables() throws {
-        let table = MarkdownBlocks.parse(text: "a | b\n---: | :---\n 1 | 2 \n3|4\n\nafter", isStreaming: false)
+        let table = MarkdownBlocks.parse("a | b\n---: | :---\n 1 | 2 \n3|4\n\nafter", isStreaming: false)
         try equal(table, [.table(headers: ["a", "b"], rows: [["1", "2"], ["3", "4"]]), .paragraph("after")])
         // A pipe line with no divider row below stays a paragraph.
-        let notTable = MarkdownBlocks.parse(text: "a | b\nno divider", isStreaming: false)
+        let notTable = MarkdownBlocks.parse("a | b\nno divider", isStreaming: false)
         try equal(notTable, [.paragraph("a | b\nno divider")])
         // Headings need whitespace after the hashes.
-        let notHeading = MarkdownBlocks.parse(text: "##nospace\n", isStreaming: false)
+        let notHeading = MarkdownBlocks.parse("##nospace\n", isStreaming: false)
         try equal(notHeading, [.paragraph("##nospace")])
     }
 
