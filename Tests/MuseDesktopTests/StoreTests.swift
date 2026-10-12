@@ -310,6 +310,23 @@ enum StoreTests {
                 }
                 try await waitUntil { fixtureStore.pendingRequests.isEmpty }
                 print("PASS userInput/answer settles the pending question")
+                // Order beat: approval + question dock in receive order.
+                fixtureStore.newSession(); fixtureStore.draft = "pending both checks"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.pendingRequests.count == 2 }
+                let ids = fixtureStore.pendingRequests.map(\.id)
+                if ids == ["approval:appr-m", "question:q-m"],
+                   fixtureStore.pendingRequests[0].question == false,
+                   fixtureStore.pendingRequests[1].question == true {
+                    print("PASS mixed pending requests dock in order")
+                } else { failures += 1; print("FAIL pending order: \(ids)") }
+                if let first = fixtureStore.pendingRequests.first {
+                    fixtureStore.decide(first.request, choice: .object(["choiceId": .string("allow")]))
+                    try await waitUntil { fixtureStore.pendingRequests.count == 1 }
+                }
+                if fixtureStore.pendingRequests.first?.id == "question:q-m" {
+                    print("PASS deciding one request leaves the other docked")
+                } else { failures += 1; print("FAIL wrong request remained: \(fixtureStore.pendingRequests.map(\.id))") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
