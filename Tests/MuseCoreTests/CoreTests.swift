@@ -32,6 +32,7 @@ enum CoreTests {
             ("transcript folds started/updated/completed into one item", testTranscriptUpsertLifecycle),
             ("transcript ignores revisions that do not advance", testTranscriptRejectsStaleRevisions),
             ("approval falls back to tool/socket/process subjects", testApprovalFallbackKinds),
+            ("transcript rejects non-text fields and replayed cursors", testTranscriptDeltaFieldWhitelist),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -219,6 +220,29 @@ enum CoreTests {
 
     // Deltas target live items only: an unstarted itemId, a completed item,
     // and unknown fields/methods are ignored — never resurrected or appended.
+    static func testTranscriptDeltaFieldWhitelist() throws {
+        var transcript = Transcript()
+        let started: JSONValue = .object(["method": .string("item/started"), "params": .object([
+            "item": .object(["itemId": .string("t"), "kind": .string("tool"), "status": .string("inProgress"),
+                "revision": .number(1), "args": .string("cmd")])])])
+        try equal(transcript.apply(started), true)
+        func delta(_ field: String, _ d: String, _ cursor: String?) -> JSONValue {
+            var p: [String: JSONValue] = ["itemId": .string("t"), "field": .string(field), "delta": .string(d)]
+            if let cursor { p["viewCursor"] = .string(cursor) }
+            return .object(["method": .string("item/delta"), "params": .object(p)])
+        }
+        // Only text/visibleOutput/args are writable through a delta.
+        for field in ["id", "kind", "status", "revision"] {
+            try equal(transcript.apply(delta(field, "x", nil)), false)
+        }
+        // The same viewCursor arrives twice on retries; the replay is dropped.
+        try equal(transcript.apply(delta("text", " a", "c1")), true)
+        try equal(transcript.apply(delta("text", " a", "c1")), false)
+        // A new cursor appends.
+        try equal(transcript.apply(delta("text", "b", "c2")), true)
+        try equal(transcript.items[0].raw["text"].string, " ab")
+    }
+
     static func testTranscriptRejectsStaleRevisions() throws {
         var transcript = Transcript()
         func item(_ rev: Int, _ text: String) -> JSONValue {
