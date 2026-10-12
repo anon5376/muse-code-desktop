@@ -604,6 +604,19 @@ enum StoreTests {
                 if fixtureStore.current?.loaded == false, fixtureStore.errorMessage != nil {
                     print("PASS selectSession surfaces resume failure")
                 } else { failures += 1; print("FAIL resume: \(fixtureStore.errorMessage ?? "none")") }
+                // refreshPlugins runs the executable as a CLI; the fixture is a
+                // JSON-RPC host, so it must land an honest error, not a hang.
+                await fixtureStore.refreshPlugins()
+                if !fixtureStore.pluginsLoading, fixtureStore.pluginsError != nil {
+                    print("PASS refreshPlugins surfaces a non-CLI executable honestly")
+                } else { failures += 1; print("FAIL plugins: \(fixtureStore.pluginsError ?? "nil")") }
+                // reconnect() respawns the host and rebuilds the catalog; the
+                // session list (from session/list) empties for a fresh fixture.
+                fixtureStore.reconnect()
+                try await waitUntil { fixtureStore.engine == .ready && !fixtureStore.isBusy }
+                if fixtureStore.sessions.isEmpty {
+                    print("PASS reconnect re-handshakes and refreshes the session list")
+                } else { failures += 1; print("FAIL reconnect kept \(fixtureStore.sessions.count) sessions") }
             }
         } catch { failures += 1; print("FAIL workspace lifecycle setup: \(error)") }
         await modelStore?.shutdownAndWait()
