@@ -27,7 +27,7 @@ never a public issue.
 ```sh
 bash scripts/build-app.sh      # release app bundle in build/
 bash scripts/test.sh           # core + workspace suites
-bash scripts/package-dmg.sh    # reproducible DMG + .sha256
+bash scripts/package-dmg.sh    # checksummed DMG + .sha256
 bash scripts/verify-dmg.sh     # mount/install/launch checks
 ```
 
