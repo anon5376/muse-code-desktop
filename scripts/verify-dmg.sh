@@ -97,4 +97,4 @@ fi
 echo "PASS: app stays up and reports the missing CLI ($window)"
 kill "$nomuse_pid" 2>/dev/null || true
 
-echo "DMG verification passed. Evidence in $verify_dir"
+echo "DMG verification passed. Evidence in $verify_dir" || true
