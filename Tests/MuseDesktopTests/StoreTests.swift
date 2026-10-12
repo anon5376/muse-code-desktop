@@ -56,7 +56,8 @@ enum StoreTests {
                 let rich = SkillEntry(raw: .object(["selector": .string("sel-x"), "display_name": .string("Pretty"),
                     "name": .string("slug-x"), "description": .string("Does things"), "scope": .string("user")]))
                 if rich.id == "sel-x", rich.invocationName == "sel-x", rich.name == "Pretty",
-                   rich.source == "user", rich.isEnabled, rich.matches("SLUG"), rich.matches("does things"), !rich.matches("zzz") {
+                   rich.source == "user", rich.isEnabled, rich.matches("SEL-X"), rich.matches("does things"),
+                   rich.matches("pretty"), !rich.matches("zzz") {
                     print("PASS skill entries resolve selectors and fallbacks")
                 } else { failures += 1; print("FAIL skill entry: \(rich.id) \(rich.name)") }
                 let bare = SkillEntry(raw: .object(["name": .string("bare")]))
