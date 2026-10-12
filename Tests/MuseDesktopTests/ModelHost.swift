@@ -54,6 +54,16 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
         result = [:]
     case "item/readOutput":
         result = ["content": "fixture tool output", "eof": true]
+    case "session/fork":
+        result = ["session": ["sessionId": "fork-1", "workspaceRoot": lastWorkspace, "modelId": "fixture-model", "providerId": "fixture"],
+                  "history": ["items": [["itemId": "f-1", "kind": "agentMessage", "status": "completed", "revision": 1, "text": "forked history"]]]]
+    case "usage/read":
+        result = ["usage": ["plan": "fixture-pro", "tokens": 42]]
+    case "turn/interrupt":
+        result = ["status": "accepted"]
+        event("turn/completed", ["sessionId": params["sessionId"] ?? sessionID, "turnId": params["turnId"] ?? "", "terminal": "interrupted"])
+    case "noop/action":
+        result = ["status": "noop", "reason": "already done"]
     case "session/setModel":
         active = true
         event("session/modelChanged", ["sessionId": params["sessionId"] ?? sessionID, "modelId": "fixture-model", "providerId": "fixture"])
@@ -72,6 +82,11 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
         let turnID = params["commandId"] as! String
         result = ["status": "accepted", "turnId": turnID]
         let target = params["sessionId"] as? String ?? sessionID
+        if (input.first?["text"] as? String) == "interrupt demo" {
+            event("turn/started", ["sessionId": target, "turnId": turnID])
+            writeFrame(["jsonrpc": "2.0", "id": id, "result": result])
+            continue
+        }
         if (input.first?["text"] as? String) == "delayed terminal failure" {
             event("turn/started", ["sessionId": target, "turnId": turnID])
             DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(200)) {
