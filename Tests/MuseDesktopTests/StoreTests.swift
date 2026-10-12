@@ -292,7 +292,7 @@ enum StoreTests {
                     print("PASS approval request docks in arrival order")
                 } else { failures += 1; print("FAIL approval request did not dock: \(fixtureStore.pendingRequests.map(\.id))") }
                 if let pending = fixtureStore.pendingRequests.first {
-                    fixtureStore.decide(pending.request, .object(["choiceId": .string("allow")]))
+                    fixtureStore.decide(pending.request, choice: .object(["choiceId": .string("allow")]))
                 }
                 try await waitUntil { fixtureStore.pendingRequests.isEmpty }
                 print("PASS approval/decide clears the pending request")
