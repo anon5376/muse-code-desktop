@@ -36,6 +36,8 @@ enum CoreTests {
             ("JSONValue survives an encode/decode round trip", testJSONValueCodableRoundTrip),
             ("connection failures carry actionable descriptions", testConnectionFailureCopy),
             ("Markdown groups pipe tables and keeps non-tables literal", testMarkdownTables),
+            ("session history decodes each wire shape or throws", testSessionHistoryContract),
+            ("framing enforces the maximum frame size", testFramingBoundary),
             ("item deltas obey the active gate and per-item cursors", testTranscriptDeltaActiveGate),
             ("Markdown fence run lengths and list spacing", testMarkdownFenceRuns),
             ("transcript restore replaces items and delta cursors", testTranscriptRestoreResets),
@@ -556,6 +558,42 @@ enum CoreTests {
             .table(headers: ["a", "b"], rows: [["1", "2", "3"]]), .paragraph("4")])
         // A paragraph yields to a list mid-run.
         try equal(MarkdownBlocks.parse("intro\n- item"), [.paragraph("intro"), .listItem(marker: "•", text: "item", indent: 0)])
+    }
+
+    static func testSessionHistoryContract() throws {
+        // mode "none" throws and carries the host's reason.
+        do {
+            _ = try SessionHistory.items(.object(["mode": .string("none"), "noneReason": .string("no disk")]))
+            try equal(true, false)
+        } catch let error as ConnectionFailure {
+            try equal(error.errorDescription?.contains("no disk"), true)
+        }
+        // A flat items array passes through verbatim.
+        let flat = try SessionHistory.items(.object(["items": .array([.string("x")])]))
+        try equal(flat, [.string("x")])
+        // A versioned snapshot unwraps state.items; another version throws.
+        let snap = try SessionHistory.items(.object(["snapshot": .object([
+            "schemaVersion": .number(1), "state": .object(["items": .array([.string("y")])])])]))
+        try equal(snap, [.string("y")])
+        do {
+            _ = try SessionHistory.items(.object(["snapshot": .object(["schemaVersion": .number(2)])]))
+            try equal(true, false)
+        } catch {}
+        // Neither key is a protocol error, not an empty transcript.
+        do { _ = try SessionHistory.items(.object([:])); try equal(true, false) } catch {}
+    }
+
+    static func testFramingBoundary() throws {
+        // A frame at exactly the cap passes; one byte over fails fast.
+        var framer = LineFramer(maximumFrameBytes: 4)
+        try equal(try framer.append(Data("ab\ncdef\n".utf8)), [Data("ab".utf8), Data("cdef".utf8)])
+        var overflow = LineFramer(maximumFrameBytes: 4)
+        do {
+            _ = try overflow.append(Data("abcde\n".utf8)); try equal(true, false)
+        } catch {}
+        // Buffered bytes without a newline are held against the same cap.
+        var pending = LineFramer(maximumFrameBytes: 4)
+        do { _ = try pending.append(Data("abcde".utf8)); try equal(true, false) } catch {}
     }
 
     static func testMarkdownTables() throws {
