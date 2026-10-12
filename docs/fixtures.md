@@ -34,10 +34,20 @@ Workspace-store fixture used by `scripts/test-workspace.sh`:
   `pending both checks` emits one of each in order; `stream demo` folds a
   streamed turn (`item/delta` chunks, token/context usage, `durationMs`);
   `lifecycle demo` emits model/goal/approval-mode change notifications;
-  `gap demo` emits `view/gap` to mark the session unavailable
-- no `session/resume` handler: `session/start`-created sessions report
-  `loaded`, so `selectSession` takes the early (no-resume) path. Exercising
-  the resume path needs a fixture that answers `session/resume`
+  `gap demo` emits `view/gap` to mark the session unavailable;
+  `notification tail` exercises `approval/updated` + `session/started`
+  upserts; `notload demo` emits `statusChanged notLoaded`; `rename demo`
+  emits `session/nameChanged`; `session list hygiene` covers upsert's
+  workspace/title guards; `isolation demo` sends events keyed to another
+  session; `background start`/`background stop` emit `turn/started` +
+  `turn/completed` for `extra-r`; `interrupt demo` starts a turn that only
+  `turn/interrupt` ends. The fixture also answers `item/readOutput`,
+  `usage/read`, `session/fork` (returns `fork-1` with history), and any
+  method ending in `/action`-style `noop` via `noop/action`
+- `session/resume` is answered only for the hard-coded id `buf-s` (a
+  delayed result with an item event in front, exercising the buffered
+  channel); every other id gets an empty result, so resume lands in the
+  failure path — which the suite asserts on `extra-s`
 
 ## Adding a beat
 
