@@ -575,12 +575,9 @@ enum CoreTests {
         let snap = try SessionHistory.items(.object(["snapshot": .object([
             "schemaVersion": .number(1), "state": .object(["items": .array([.string("y")])])])]))
         try equal(snap, [.string("y")])
-        do {
-            _ = try SessionHistory.items(.object(["snapshot": .object(["schemaVersion": .number(2)])]))
-            try equal(true, false)
-        } catch {}
+        try throwsError { _ = try SessionHistory.items(.object(["snapshot": .object(["schemaVersion": .number(2)])])) }
         // Neither key is a protocol error, not an empty transcript.
-        do { _ = try SessionHistory.items(.object([:])); try equal(true, false) } catch {}
+        try throwsError { _ = try SessionHistory.items(.object([:])) }
     }
 
     static func testFramingBoundary() throws {
@@ -588,12 +585,10 @@ enum CoreTests {
         var framer = LineFramer(maximumFrameBytes: 4)
         try equal(try framer.append(Data("ab\ncdef\n".utf8)), [Data("ab".utf8), Data("cdef".utf8)])
         var overflow = LineFramer(maximumFrameBytes: 4)
-        do {
-            _ = try overflow.append(Data("abcde\n".utf8)); try equal(true, false)
-        } catch {}
+        try throwsError { _ = try overflow.append(Data("abcde\n".utf8)) }
         // Buffered bytes without a newline are held against the same cap.
         var pending = LineFramer(maximumFrameBytes: 4)
-        do { _ = try pending.append(Data("abcde".utf8)); try equal(true, false) } catch {}
+        try throwsError { _ = try pending.append(Data("abcde".utf8)) }
     }
 
     static func testMarkdownTables() throws {
