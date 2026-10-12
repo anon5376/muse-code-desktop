@@ -16,6 +16,7 @@ No webview · no extra runtime · zero third-party dependencies.</p>
 <a href="https://github.com/anon5376/muse-code-desktop/releases/tag/v0.1.0"><img src="https://img.shields.io/badge/Notes_%2B_checksum-262626?style=flat&labelColor=0d0d0d" alt="Release notes"></a>
 <img src="https://img.shields.io/badge/macOS-14%2B-262626?style=flat&labelColor=0d0d0d" alt="macOS 14+">
 <img src="https://img.shields.io/badge/Deps-none-262626?style=flat&labelColor=0d0d0d" alt="Zero dependencies">
+<a href="https://github.com/anon5376/muse-code-desktop/actions/workflows/build.yml"><img src="https://github.com/anon5376/muse-code-desktop/actions/workflows/build.yml/badge.svg" alt="build"></a>
 <img src="https://img.shields.io/badge/License-MIT-262626?style=flat&labelColor=0d0d0d" alt="MIT License">
 <a href="https://github.com/anon5376/muse-code-desktop/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/anon5376/muse-code-desktop/build.yml?branch=main&style=flat&label=build&labelColor=0d0d0d" alt="CI build status"></a>
 
