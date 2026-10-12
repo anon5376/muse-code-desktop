@@ -30,7 +30,11 @@ Workspace-store fixture used by `scripts/test-workspace.sh`:
   `explicit model` is rejected unless `reasoningEffort: "high"` accompanies
   it; `pending approval check` emits `approval/requested`
   mid-turn and `approval/decide` resolves it; `pending question check`
-  emits `userInput/requested` and `userInput/answer` settles it
+  emits `userInput/requested` and `userInput/answer` settles it;
+  `pending both checks` emits one of each in order; `stream demo` folds a
+  streamed turn (`item/delta` chunks, token/context usage, `durationMs`);
+  `lifecycle demo` emits model/goal/approval-mode change notifications;
+  `gap demo` emits `view/gap` to mark the session unavailable
 - no `session/resume` handler: `session/start`-created sessions report
   `loaded`, so `selectSession` takes the early (no-resume) path. Exercising
   the resume path needs a fixture that answers `session/resume`
