@@ -370,6 +370,14 @@ enum StoreTests {
                 if fixtureStore.current?.loaded == false, fixtureStore.pendingRequests.isEmpty {
                     print("PASS notLoaded invalidates the session")
                 } else { failures += 1; print("FAIL notload: \(fixtureStore.current?.loaded ?? true)") }
+                // Selecting a listed-but-unloaded session fails resume honestly:
+                // the fixture has no session/resume, so the missing history
+                // throws and the state lands unavailable with an error.
+                fixtureStore.selectSession("extra-s")
+                try await waitUntil { fixtureStore.current?.unavailable == true }
+                if fixtureStore.current?.loaded == false, fixtureStore.errorMessage != nil {
+                    print("PASS selectSession surfaces resume failure")
+                } else { failures += 1; print("FAIL resume: \(fixtureStore.errorMessage ?? "none")") }
                 // session/nameChanged rewrites the row's title in place.
                 fixtureStore.newSession(); fixtureStore.draft = "rename demo"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
