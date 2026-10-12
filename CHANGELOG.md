@@ -33,6 +33,15 @@ Documentation and test hardening only — no product behavior changed.
   checks passed — its final echo is now non-fatal
 - Fixed: a flaky workspace-store check that raced ModelHost's delayed
   terminal failure (now polls with `waitUntil`)
+- Covered the store's full notification surface end-to-end via ModelHost
+  beats: approval/question docks, stream folding, lifecycle metadata,
+  `view/gap`, `approval/updated` merges, `session/started` upserts,
+  `nameChanged`, `notLoaded` invalidation, upsert guards, cross-session
+  isolation, background turns, resume buffering + failure, `session/fork`,
+  `turn/interrupt`, `usage/read`, `item/readOutput`, `noop/action`,
+  the 1 MiB draft cap, and the Files-inspector scan/preview/mention chain
+- Store: `states` is now `private(set)` so tests can observe session
+  transitions
 
 ## [v0.1.0] — 2026-10-08 ([release](https://github.com/anon5376/muse-code-desktop/releases/tag/v0.1.0))
 Initial public preview (prerelease).
