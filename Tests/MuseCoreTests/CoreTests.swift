@@ -324,8 +324,11 @@ enum CoreTests {
     }
 
     static func testApprovalFallbackKinds() throws {
-        // toolName alone is the honest fallback for a tool request.
-        try equal(ApprovalDescription.summary(.object(["toolName": .string("shell.exec")])), "shell.exec")
+        // Tool requests read subject.toolName, then the request-level fallback.
+        try equal(ApprovalDescription.summary(.object(["subject": .object([
+            "kind": .string("tool"), "toolName": .string("shell.exec")])])), "shell.exec")
+        try equal(ApprovalDescription.summary(.object(["toolName": .string("request.level"),
+            "subject": .object(["kind": .string("tool")])])), "request.level")
         try equal(ApprovalDescription.summary(.object(["subject": .object([
             "kind": .string("unixSocket"), "path": .string("/run/daemon.sock")])])), "unixSocket: /run/daemon.sock")
         try equal(ApprovalDescription.summary(.object(["subject": .object([
