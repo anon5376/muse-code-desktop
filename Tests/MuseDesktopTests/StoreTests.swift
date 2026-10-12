@@ -209,11 +209,6 @@ enum StoreTests {
             guard let model = fixtureStore.models.first else {
                 throw Failure(description: "The model fixture did not connect: \(fixtureStore.errorMessage ?? "no error")")
             }
-            // The fixture's empty skill/list is honest: no invented entries.
-            await fixtureStore.refreshSkills()
-            if fixtureStore.skills.isEmpty, fixtureStore.skillsError == nil {
-                print("PASS empty skill catalog reports empty, not an error")
-            } else { failures += 1; print("FAIL empty skill list raised \(fixtureStore.skillsError ?? "no error")") }
             // The configured default is a real route, so its advertised effort
             // choices must be usable before a session exists.
             fixtureStore.chooseReasoning("high")
@@ -247,7 +242,7 @@ enum StoreTests {
                 await fixtureStore.refreshSkills()
                 if fixtureStore.skills.isEmpty, fixtureStore.skillsError == nil {
                     print("PASS empty skill catalog reports empty, not an error")
-                } else { failures += 1; print("FAIL empty skill list raised \(fixtureStore.skillsError ?? "no error") (loaded=\(fixtureStore.current?.loaded ?? false) unavailable=\(fixtureStore.current?.unavailable ?? false) engine=\(fixtureStore.engine) hasLoaded=\(fixtureStore.hasLoadedSession) sessionCatalog=\(fixtureStore.skillsAreSessionCatalog))") }
+                } else { failures += 1; print("FAIL empty skill list raised \(fixtureStore.skillsError ?? "no error") ") }
                 let restoredFirst = fixtureStore.reasoningEffort == "high"
                 if let secondID { fixtureStore.selectSession(secondID); await fixtureStore.refreshModels() }
                 if firstID != secondID, restoredFirst, fixtureStore.reasoningEffort == nil {
