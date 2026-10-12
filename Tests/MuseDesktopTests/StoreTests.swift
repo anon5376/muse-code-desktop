@@ -438,6 +438,31 @@ enum StoreTests {
                    fixtureStore.states["extra-r"]?.activeTurn == nil {
                     print("PASS background turn completes into completedTurns")
                 } else { failures += 1; print("FAIL background stop") }
+                // readToolOutput folds the item/readOutput reply into actionOutput.
+                fixtureStore.newSession(); fixtureStore.draft = "read tool out"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                let outItem = TranscriptItem(.object(["itemId": .string("out-1"), "status": .string("completed"),
+                    "revision": .number(1), "outputRef": .object(["id": .string("ref-1")])]))
+                fixtureStore.readToolOutput(outItem)
+                try await waitUntil { fixtureStore.actionOutput != nil }
+                if fixtureStore.actionOutput == "fixture tool output" {
+                    print("PASS readToolOutput lands the response")
+                } else { failures += 1; print("FAIL actionOutput: \(fixtureStore.actionOutput ?? "nil")") }
+                // attentionCount + otherAttentionSession reflect the extra-r dock.
+                if fixtureStore.attentionCount("extra-r") == 1,
+                   fixtureStore.otherAttentionSession?.id == "extra-r" {
+                    print("PASS attention counters follow non-selected docks")
+                } else { failures += 1; print("FAIL attention: \(fixtureStore.attentionCount("extra-r")) \(fixtureStore.otherAttentionSession?.id ?? "nil")") }
+                // A draft over 1 MiB is refused honestly, not sent.
+                fixtureStore.newSession()
+                try await waitUntil { fixtureStore.modelExecutionReady }
+                fixtureStore.draft = String(repeating: "x", count: 1_048_577)
+                fixtureStore.send()
+                try await waitUntil { fixtureStore.errorMessage != nil }
+                if fixtureStore.errorMessage?.contains("1 MiB") == true {
+                    print("PASS oversized drafts are refused")
+                } else { failures += 1; print("FAIL oversize: \(fixtureStore.errorMessage ?? "nil")") }
+                fixtureStore.draft = ""; fixtureStore.errorMessage = nil
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {

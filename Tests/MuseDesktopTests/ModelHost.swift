@@ -52,6 +52,8 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             continue
         }
         result = [:]
+    case "item/readOutput":
+        result = ["content": "fixture tool output", "eof": true]
     case "session/setModel":
         active = true
         event("session/modelChanged", ["sessionId": params["sessionId"] ?? sessionID, "modelId": "fixture-model", "providerId": "fixture"])
