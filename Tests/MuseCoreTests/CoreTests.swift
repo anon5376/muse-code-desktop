@@ -512,7 +512,7 @@ enum CoreTests {
         // A completed item ignores further deltas.
         _ = t.apply(.object(["method": .string("item/updated"), "params": .object([
             "item": .object(["itemId": .string("done"), "status": .string("completed"),
-                             "revision": .int(1), "text": .string("final")])])]))
+                             "revision": .number(1), "text": .string("final")])])]))
         try equal(t.apply(.object(["method": .string("item/delta"), "params": .object([
             "itemId": .string("done"), "delta": .string(" more")])])), false)
         try equal(t.items[0].text, "final")
@@ -520,7 +520,7 @@ enum CoreTests {
         func live(_ t: inout Transcript, _ id: String) {
             _ = t.apply(.object(["method": .string("item/started"), "params": .object([
                 "item": .object(["itemId": .string(id), "status": .string("inProgress"),
-                                 "revision": .int(1)])])]))
+                                 "revision": .number(1)])])]))
         }
         live(&t, "a"); live(&t, "b")
         func delta(_ id: String, _ text: String, _ cursor: String) -> JSONValue {
@@ -532,11 +532,11 @@ enum CoreTests {
         try equal(t.apply(delta("a", "x", "c")), false)  // replayed on item a
         // An item without an id can never land.
         try equal(t.apply(.object(["method": .string("item/updated"), "params": .object([
-            "item": .object(["status": .string("completed"), "revision": .int(1)])])])), false)
+            "item": .object(["status": .string("completed"), "revision": .number(1)])])])), false)
         // A higher revision replaces the row in place, keeping its position.
         _ = t.apply(.object(["method": .string("item/updated"), "params": .object([
             "item": .object(["itemId": .string("b"), "status": .string("completed"),
-                             "revision": .int(9), "text": .string("B")])])]))
+                             "revision": .number(9), "text": .string("B")])])]))
         try equal(t.items.map(\.id), ["done", "a", "b"])
         try equal(t.items[2].text, "B")
     }
