@@ -61,6 +61,9 @@ components:
     textColor: "#FFFFFF"
 ---
 
+> This direction serves the product contract in [PRODUCT.md](PRODUCT.md).
+
+
 # Design System: Muse Code Desktop
 
 ## Contents

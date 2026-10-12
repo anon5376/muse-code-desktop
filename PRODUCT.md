@@ -2,6 +2,8 @@
 
 <!-- impeccable:product-schema 1 -->
 
+> The visual direction this spec implements lives in [DESIGN.md](DESIGN.md).
+
 ## Platform
 macOS — a native desktop app, not an iOS or web surface.
 
