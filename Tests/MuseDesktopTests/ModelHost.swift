@@ -65,6 +65,16 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     case "fail/action":
         writeFrame(["jsonrpc": "2.0", "id": id, "error": ["code": -32601, "message": "Synthetic action failure"]])
         continue
+    case "upsert/action":
+        result = ["status": "accepted", "session": ["sessionId": "act-s", "workspaceRoot": lastWorkspace, "title": "Action session"]]
+    case "track/action":
+        result = ["status": "accepted", "turnId": "track-1"]
+        let target = params["sessionId"] as? String ?? sessionID
+        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(50)) {
+            event("turn/completed", ["sessionId": target, "turnId": "track-1", "terminal": "completed"])
+        }
+    case "subagent/readResult":
+        result = ["status": "accepted", "result": ["text": "fixture subagent result"]]
     case "noop/action":
         result = ["status": "noop", "reason": "already done"]
     case "session/setModel":

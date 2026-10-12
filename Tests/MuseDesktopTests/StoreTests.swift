@@ -516,6 +516,25 @@ enum StoreTests {
                 } else { failures += 1; print("FAIL action error: \(fixtureStore.actionError ?? "nil") pending \(fixtureStore.pendingActions.count)") }
                 fixtureStore.actionError = nil
                 fixtureStore.actionNotice = nil
+                // sessionAction result fields: "session" upserts a summary,
+                // "turnId" tracks the turn, subagent/readResult fills
+                // actionOutput with the pretty-printed result.
+                fixtureStore.sessionAction("upsert/action", label: "Upsert")
+                try await waitUntil { fixtureStore.sessions.contains(where: { $0.id == "act-s" }) }
+                if fixtureStore.sessions.first(where: { $0.id == "act-s" })?.title == "Action session" {
+                    print("PASS sessionAction upserts a returned session")
+                } else { failures += 1; print("FAIL action upsert") }
+                fixtureStore.sessionAction("track/action", label: "Track")
+                // The fixture completes track-1 after 50 ms; watching it clear
+                // proves the action's turnId was tracked as the active turn.
+                try await waitUntil { fixtureStore.current?.completedTurns.contains("track-1") == true && fixtureStore.current?.activeTurn == nil }
+                print("PASS sessionAction turnId marks the turn active")
+                fixtureStore.sessionAction("subagent/readResult", label: "Subagent")
+                try await waitUntil { fixtureStore.actionOutput != nil }
+                if fixtureStore.actionOutput?.contains("fixture subagent result") == true {
+                    print("PASS subagent/readResult surfaces its result")
+                } else { failures += 1; print("FAIL subagent output: \(fixtureStore.actionOutput ?? "nil")") }
+                fixtureStore.actionOutput = nil
                 // Files inspector: scan -> preview -> mention all land on the store.
                 let probe = root.appendingPathComponent("probe-file.txt")
                 try "probe body".write(to: probe, atomically: true, encoding: .utf8)
