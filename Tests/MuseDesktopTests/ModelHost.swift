@@ -29,7 +29,8 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     case "skill/list": result = ["skills": [["selector": "fixture-skill", "name": "Fixture skill", "activation": "on"]]]
     case "model/list":
         if active { Thread.sleep(forTimeInterval: 0.08) }
-        result = ["models": [["modelId": "fixture-model", "providerId": "fixture", "profileId": "personal", "variants": ["high"], "isDefault": true, "isActive": params["sessionId"] != nil]], "source": "fakeCatalog"]
+        result = ["models": [["modelId": "fixture-model", "providerId": "fixture", "profileId": "personal", "variants": ["high"], "isDefault": true, "isActive": params["sessionId"] != nil],
+                              ["modelId": "reject-m", "providerId": "fixture", "profileId": "personal", "variants": [], "isDefault": false, "isActive": false]], "source": "fakeCatalog"]
     case "session/start":
         sessionNumber += 1; sessionID = "model-ordering-session-\(sessionNumber)"; active = true
         lastWorkspace = params["workspaceRoot"] as? String ?? ""
@@ -78,6 +79,10 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     case "noop/action":
         result = ["status": "noop", "reason": "already done"]
     case "session/setModel":
+        if (params["model"] as? [String: Any])?["modelId"] as? String == "reject-m" {
+            writeFrame(["jsonrpc": "2.0", "id": id, "error": ["code": -32602, "message": "Synthetic model refusal"]])
+            continue
+        }
         active = true
         event("session/modelChanged", ["sessionId": params["sessionId"] ?? sessionID, "modelId": "fixture-model", "providerId": "fixture"])
         result = ["status": "accepted"]
