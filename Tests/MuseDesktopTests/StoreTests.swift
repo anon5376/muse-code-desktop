@@ -370,6 +370,13 @@ enum StoreTests {
                 if fixtureStore.current?.loaded == false, fixtureStore.pendingRequests.isEmpty {
                     print("PASS notLoaded invalidates the session")
                 } else { failures += 1; print("FAIL notload: \(fixtureStore.current?.loaded ?? true)") }
+                // session/nameChanged rewrites the row's title in place.
+                fixtureStore.newSession(); fixtureStore.draft = "rename demo"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.sessions.contains(where: { $0.id == "extra-r" }) }
+                if fixtureStore.sessions.first(where: { $0.id == "extra-r" })?.title == "Renamed" {
+                    print("PASS nameChanged updates the session row")
+                } else { failures += 1; print("FAIL rename: \(fixtureStore.sessions.filter { $0.id == "extra-r" })") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
