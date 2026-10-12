@@ -423,6 +423,17 @@ enum StoreTests {
                    fixtureStore.states["extra-r"]?.transcript.items.contains(where: { $0.id == "iso-1" }) == true {
                     print("PASS events for another session stay out of the selected state")
                 } else { failures += 1; print("FAIL isolation: live \(liveCount) selected \(fixtureStore.selectedID ?? "nil")") }
+                // A turn on another session shows as background activity only.
+                fixtureStore.newSession(); fixtureStore.draft = "background activity"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                // Events land in one batch; the completed event may already have cleared.
+                if fixtureStore.sessionIsRunning("extra-r") == false,
+                   fixtureStore.current?.activeTurn == nil {
+                    print("PASS completed background turn leaves no activity")
+                } else { failures += 1; print("FAIL background activity stuck") }
+                if fixtureStore.states["extra-r"]?.completedTurns.contains("bg-1") == true {
+                    print("PASS background turn recorded as completed")
+                } else { failures += 1; print("FAIL completedTurns missing bg-1") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
