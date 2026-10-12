@@ -522,6 +522,20 @@ enum StoreTests {
                    fixtureStore.current?.transcript.items.contains(where: { $0.text == "Skill invoked: fixture-skill" }) == true {
                     print("PASS skill send submits the session-catalog selector")
                 } else { failures += 1; print("FAIL skill send pending \(fixtureStore.pendingSkill != nil)") }
+                // setModel round-trips session/setModel and clears the
+                // pending reasoning effort; the modelChanged event updates
+                // the session's route.
+                fixtureStore.chooseReasoning("high")
+                if fixtureStore.reasoningEffort == "high" {
+                    print("PASS chooseReasoning accepts a supported effort")
+                } else { failures += 1; print("FAIL chooseReasoning: \(fixtureStore.reasoningEffort ?? "nil")") }
+                fixtureStore.setModel(fixtureStore.models[0])
+                try await waitUntil { !fixtureStore.isChangingModel }
+                try await waitUntil { fixtureStore.current?.model == "fixture-model" }
+                if fixtureStore.reasoningEffort == nil, fixtureStore.modelError == nil,
+                   fixtureStore.current?.provider == "fixture" {
+                    print("PASS setModel clears the effort and lands the route change")
+                } else { failures += 1; print("FAIL setModel: effort \(fixtureStore.reasoningEffort ?? "nil") err \(fixtureStore.modelError ?? "nil")") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
