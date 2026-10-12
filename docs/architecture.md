@@ -31,9 +31,11 @@ Pure Swift, no AppKit. Everything here is testable against fixtures.
 
 | Area | Files |
 | --- | --- |
+| Entry | `MuseDesktopApp.swift` (app scene, window, commands) |
 | State | `WorkspaceStore.swift` (session lifecycle, pending requests, drafts) |
 | Chrome | `WorkspaceView.swift`, `Theme.swift`, `SettingsView.swift` |
-| Content | `TranscriptView.swift`, `LibraryView.swift`, `ModelPicker.swift` |
+| Content | `TranscriptView.swift`, `MarkdownBody.swift`, `LibraryView.swift`, `ModelPicker.swift` |
+| Inspector | `InspectorView.swift`, `PendingRequestDock.swift` |
 | Catalog | `CLICatalog.swift`, `FileBrowser.swift` |
 
 `Sources/MuseDiagnostics` is a tiny CLI wrapping `EchoDiagnostic` for
