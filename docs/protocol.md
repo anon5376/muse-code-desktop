@@ -60,3 +60,15 @@ app only relies on what is listed here.
 answered with `approval/decide` / `userInput/answer`. Any other inbound
 method is refused with JSON-RPC `-32601` ("Client method is not supported") —
 the app never silently handles a request shape it doesn't know.
+
+When either pending-request method arrives carrying an `id`, the app replies
+`{}` immediately — a presentation receipt only; the human decision still
+travels on `approval/decide` / `userInput/answer`, never on that reply.
+
+`userInput/answer` bodies follow the host's question contract
+(`UserInputAnswer.make` enforces it before sending): `selectedLabel` for
+`selection.mode: "single"` (exactly one label), `selectedLabels` for
+`"multiple"` (bounded by `minSelections`/`maxSelections`, defaults `1` and
+unbounded), or `freeText` — capped at 500 scalars — when no option is picked.
+Every selected label must come from the question's `options`; anything else
+is refused client-side and never reaches the wire.
