@@ -32,6 +32,9 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     case "session/start":
         sessionNumber += 1; sessionID = "model-ordering-session-\(sessionNumber)"; active = true
         result = ["session": ["sessionId": sessionID, "workspaceRoot": params["workspaceRoot"] ?? "", "modelId": "fixture-model", "providerId": "fixture"]]
+    case "userInput/answer":
+        result = ["status": "accepted"]
+        event("userInput/settled", ["sessionId": params["sessionId"] ?? sessionID, "userInputId": params["userInputId"] ?? ""])
     case "approval/decide":
         result = ["status": "accepted"]
         event("approval/resolved", ["sessionId": params["sessionId"] ?? sessionID, "approvalId": params["approvalId"] ?? ""])
@@ -60,6 +63,10 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             }
             writeFrame(["jsonrpc": "2.0", "id": id, "result": result])
             continue
+        }
+        if (input.first?["text"] as? String) == "pending question check" {
+            event("userInput/requested", ["sessionId": target, "userInputId": "q-1",
+                "question": ["id": "q", "selection": ["mode": "single"], "options": [["label": "A"], ["label": "B"]]]])
         }
         if (input.first?["text"] as? String) == "pending approval check" {
             event("approval/requested", ["sessionId": target, "approvalId": "appr-1", "currentRequirementId": "req-1",

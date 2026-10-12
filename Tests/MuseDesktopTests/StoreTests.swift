@@ -296,6 +296,20 @@ enum StoreTests {
                 }
                 try await waitUntil { fixtureStore.pendingRequests.isEmpty }
                 print("PASS approval/decide clears the pending request")
+                // Question beat: same dock path with question == true.
+                fixtureStore.newSession(); fixtureStore.draft = "pending question check"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.pendingRequests.count == 1 }
+                if let pending = fixtureStore.pendingRequests.first,
+                   pending.id == "question:q-1", pending.question {
+                    print("PASS question request docks as a question")
+                } else { failures += 1; print("FAIL question request did not dock: \(fixtureStore.pendingRequests.map(\.id))") }
+                if let pending = fixtureStore.pendingRequests.first,
+                   let answer = UserInputAnswer.make(question: pending.request["question"], selections: ["A"], freeText: "") {
+                    fixtureStore.answer(pending.request, answers: [answer])
+                }
+                try await waitUntil { fixtureStore.pendingRequests.isEmpty }
+                print("PASS userInput/answer settles the pending question")
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
