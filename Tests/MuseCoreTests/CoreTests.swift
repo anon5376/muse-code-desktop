@@ -38,6 +38,8 @@ enum CoreTests {
             ("Markdown groups pipe tables and keeps non-tables literal", testMarkdownTables),
             ("transcript restore replaces items and delta cursors", testTranscriptRestoreResets),
             ("prettyPrinted sorts object keys", testPrettyPrintedSortedKeys),
+            ("transcript items read honest fallbacks", testTranscriptItemFallbacks),
+            ("output deltas append to visibleOutput", testTranscriptDeltaOutputAlias),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -522,6 +524,34 @@ enum CoreTests {
         // The rpc case truncates a host message at 2,000 scalars.
         let long = String(repeating: "x", count: 3_000)
         try equal(ConnectionFailure.rpc(-1, long, nil).errorDescription?.count, 2_000)
+    }
+
+    static func testTranscriptItemFallbacks() throws {
+        let bare = TranscriptItem(.object(["itemId": .string("i"), "message": .string("from message")]))
+        try equal(bare.text, "from message")
+        try equal(bare.kind, "unknown")
+        try equal(bare.tool, "unknown")
+        let named = TranscriptItem(.object(["itemId": .string("i"), "kind": .string("tool"),
+            "commandText": .string("ls -la"), "status": .string("completed")]))
+        try equal(named.tool, "ls -la")
+        try equal(named.isActive, false)
+        let running = TranscriptItem(.object(["itemId": .string("i"), "status": .string("inProgress")]))
+        try equal(running.isActive, true)
+        // Only "inProgress" is active — terminal spellings never stream again.
+        for status in ["completed", "failed", "interrupted", "cancelled"] {
+            try equal(TranscriptItem(.object(["itemId": .string("i"), "status": .string(status)])).isActive, false)
+        }
+    }
+
+    static func testTranscriptDeltaOutputAlias() throws {
+        var transcript = Transcript()
+        _ = transcript.apply(.object(["method": .string("item/started"), "params": .object([
+            "item": .object(["itemId": .string("t"), "kind": .string("tool"), "status": .string("inProgress"),
+                "revision": .number(1)])])]))
+        // The wire field "output" is the host's name for visibleOutput.
+        try equal(transcript.apply(.object(["method": .string("item/delta"), "params": .object([
+            "itemId": .string("t"), "field": .string("output"), "delta": .string("chunk")])])), true)
+        try equal(transcript.items[0].raw["visibleOutput"].string, "chunk")
     }
 
     static func testTranscriptRestoreResets() throws {
