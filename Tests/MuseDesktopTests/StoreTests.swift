@@ -512,6 +512,16 @@ enum StoreTests {
                     print("PASS mention inserts the @path")
                 } else { failures += 1; print("FAIL mention: \(fixtureStore.draft)") }
                 fixtureStore.draft = ""
+                // Skill send: pendingSkill carries a draft-less send over the
+                // wire as a "skill" input with the session-catalog selector.
+                fixtureStore.chooseSkill(SkillEntry(raw: .object(["selector": .string("fixture-skill"), "activation": .string("on")])))
+                fixtureStore.send()
+                try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.current?.transcript.items.contains(where: { $0.text.contains("Skill invoked:") }) == true }
+                if fixtureStore.pendingSkill == nil,
+                   fixtureStore.current?.transcript.items.contains(where: { $0.text == "Skill invoked: fixture-skill" }) == true {
+                    print("PASS skill send submits the session-catalog selector")
+                } else { failures += 1; print("FAIL skill send pending \(fixtureStore.pendingSkill != nil)") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {

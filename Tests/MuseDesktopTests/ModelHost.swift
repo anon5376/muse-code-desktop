@@ -26,7 +26,7 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     switch method {
     case "initialize": result = ["schema": ["version": 1], "serverInfo": ["version": "test-fixture"]]
     case "session/list": result = ["sessions": []]
-    case "skill/list": result = ["skills": []]
+    case "skill/list": result = ["skills": [["selector": "fixture-skill", "name": "Fixture skill", "activation": "on"]]]
     case "model/list":
         if active { Thread.sleep(forTimeInterval: 0.08) }
         result = ["models": [["modelId": "fixture-model", "providerId": "fixture", "profileId": "personal", "variants": ["high"], "isDefault": true, "isActive": params["sessionId"] != nil]], "source": "fakeCatalog"]
@@ -70,6 +70,7 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
         result = ["status": "accepted"]
     case "turn/start":
         let input = params["input"] as? [[String: Any]] ?? []
+
         if (input.first?["text"] as? String) == "reject once then retry", !rejectedFirstSubmission {
             rejectedFirstSubmission = true
             writeFrame(["jsonrpc": "2.0", "id": id, "error": ["code": -32602, "message": "Synthetic first admission failure"]])
@@ -154,7 +155,11 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             event("approval/requested", ["sessionId": target, "approvalId": "appr-1", "currentRequirementId": "req-1",
                 "subject": ["kind": "shell", "command": "ls -la"]])
         }
-        event("item/completed", ["sessionId": params["sessionId"] ?? sessionID, "item": ["itemId": "confirmed-effort-" + turnID, "kind": "agentMessage", "status": "completed", "revision": 1, "text": "Requested reasoning: \(params["reasoningEffort"] as? String ?? "default")"]])
+        if input.first?["type"] as? String == "skill" {
+            event("item/completed", ["sessionId": params["sessionId"] ?? sessionID, "item": ["itemId": "skill-" + turnID, "kind": "agentMessage", "status": "completed", "revision": 1, "text": "Skill invoked: \(input.first?["selector"] as? String ?? "")"]])
+        } else {
+            event("item/completed", ["sessionId": params["sessionId"] ?? sessionID, "item": ["itemId": "confirmed-effort-" + turnID, "kind": "agentMessage", "status": "completed", "revision": 1, "text": "Requested reasoning: \(params["reasoningEffort"] as? String ?? "default")"]])
+        }
         event("turn/completed", ["sessionId": params["sessionId"] ?? sessionID, "turnId": turnID, "terminal": "completed", "durationMs": 321])
     default: break
     }
