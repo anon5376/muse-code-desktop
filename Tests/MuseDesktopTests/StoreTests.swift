@@ -224,6 +224,12 @@ enum StoreTests {
             guard let model = fixtureStore.models.first else {
                 throw Failure(description: "The model fixture did not connect: \(fixtureStore.errorMessage ?? "no error")")
             }
+            if !fixtureStore.canSend { print("PASS empty draft is not sendable") }
+            else { failures += 1; print("FAIL empty draft admitted a send") }
+            fixtureStore.draft = "has content"
+            if fixtureStore.canSend { print("PASS connected store admits a real draft") }
+            else { failures += 1; print("FAIL connected store rejected a real draft") }
+            fixtureStore.draft = ""
             // The configured default is a real route, so its advertised effort
             // choices must be usable before a session exists.
             fixtureStore.chooseReasoning("high")
