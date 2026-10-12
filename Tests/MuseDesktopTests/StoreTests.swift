@@ -339,6 +339,22 @@ enum StoreTests {
                    state.activeTurn == nil, !fixtureStore.isRunning {
                     print("PASS streamed turn folds items, usage, and turn state")
                 } else { failures += 1; print("FAIL stream fold: \(fixtureStore.current?.lastDuration ?? -1) \(fixtureStore.isRunning)") }
+                // Lifecycle notifications land on the session state.
+                fixtureStore.newSession(); fixtureStore.draft = "lifecycle demo"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.current?.model != nil }
+                if let state = fixtureStore.current,
+                   state.model == "fixture-model", state.provider == "fixture-provider",
+                   state.approvalMode == "auto", state.goal["text"].string == "fixture goal" {
+                    print("PASS lifecycle notifications update session state")
+                } else { failures += 1; print("FAIL lifecycle state: \(fixtureStore.current?.model ?? "nil")") }
+                // A view gap marks the selected session unavailable.
+                fixtureStore.newSession(); fixtureStore.draft = "gap demo"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.current?.unavailable == true }
+                if fixtureStore.current?.unavailable == true, fixtureStore.errorMessage != nil {
+                    print("PASS view gap marks the session unavailable")
+                } else { failures += 1; print("FAIL gap: \(fixtureStore.current?.unavailable ?? false)") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
