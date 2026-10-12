@@ -37,6 +37,8 @@ enum CoreTests {
             ("connection failures carry actionable descriptions", testConnectionFailureCopy),
             ("Markdown groups pipe tables and keeps non-tables literal", testMarkdownTables),
             ("session history decodes each wire shape or throws", testSessionHistoryContract),
+            ("echo diagnostic sandboxes its child under the temp root", testEchoConfiguration),
+            ("executable discovery honors the preferred path", testExecutableLocate),
             ("framing enforces the maximum frame size", testFramingBoundary),
             ("item deltas obey the active gate and per-item cursors", testTranscriptDeltaActiveGate),
             ("Markdown fence run lengths and list spacing", testMarkdownFenceRuns),
@@ -558,6 +560,32 @@ enum CoreTests {
             .table(headers: ["a", "b"], rows: [["1", "2", "3"]]), .paragraph("4")])
         // A paragraph yields to a list mid-run.
         try equal(MarkdownBlocks.parse("intro\n- item"), [.paragraph("intro"), .listItem(marker: "•", text: "item", indent: 0)])
+    }
+
+    static func testEchoConfiguration() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("echo-cfg-" + UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let config = try EchoDiagnostic.configuration(executable: URL(fileURLWithPath: "/bin/echo"),
+            workspace: URL(fileURLWithPath: "/tmp"), temporaryRoot: root)
+        try equal(config.arguments, ["serve", "--provider", "echo", "--no-session-log", "--disable-write", "--disable-shell"])
+        for key in ["XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME"] {
+            try equal(config.environment[key]?.hasPrefix(root.path), true)
+        }
+        try equal(FileManager.default.fileExists(atPath: root.path), true)
+    }
+
+    static func testExecutableLocate() throws {
+        // A preferred path that exists and is executable wins outright.
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("locate-" + UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let fake = dir.appendingPathComponent("muse")
+        FileManager.default.createFile(atPath: fake.path, contents: Data("#!/bin/sh\n".utf8))
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: fake.path)
+        try equal(MuseExecutable.locate(preferredPath: fake.path)?.path, fake.path)
+        // A path that does not exist is skipped; with no muse installed the
+        // whole lookup comes back nil (CI runners have none).
+        try equal(MuseExecutable.locate(preferredPath: dir.appendingPathComponent("nope").path) == nil, true)
     }
 
     static func testSessionHistoryContract() throws {
