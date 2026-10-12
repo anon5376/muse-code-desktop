@@ -68,6 +68,15 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             event("userInput/requested", ["sessionId": target, "userInputId": "q-1",
                 "question": ["id": "q", "selection": ["mode": "single"], "options": [["label": "A"], ["label": "B"]]]])
         }
+        if (input.first?["text"] as? String) == "stream demo" {
+            event("turn/started", ["sessionId": target, "turnId": turnID])
+            event("item/started", ["sessionId": target, "item": ["itemId": "m-stream", "kind": "agentMessage", "status": "inProgress", "revision": 1]])
+            event("item/delta", ["sessionId": target, "itemId": "m-stream", "delta": "Hello ", "viewCursor": "v1"])
+            event("item/delta", ["sessionId": target, "itemId": "m-stream", "delta": "world", "viewCursor": "v2"])
+            event("item/completed", ["sessionId": target, "item": ["itemId": "m-stream", "kind": "agentMessage", "status": "completed", "revision": 2, "text": "Hello world"]])
+            event("session/tokenUsage", ["sessionId": target, "cumulative": ["totalTokens": 1234]])
+            event("session/contextUsage", ["sessionId": target, "usedTokens": 55, "windowTokens": 200000])
+        }
         if (input.first?["text"] as? String) == "pending both checks" {
             event("approval/requested", ["sessionId": target, "approvalId": "appr-m",
                 "subject": ["kind": "shell", "command": "make check"]])
