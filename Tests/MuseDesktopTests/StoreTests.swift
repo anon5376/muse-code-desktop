@@ -50,6 +50,21 @@ enum StoreTests {
                     print("PASS non-contributor routes carry no invented notice")
                 } else { failures += 1; print("FAIL non-contributor route got a notice or collided id") }
             }
+            // visibleSessions: the search field filters case-insensitively.
+            do {
+                let filterStore = WorkspaceStore()
+                filterStore.sessions = [
+                    SessionSummary(.object(["sessionId": .string("s1"), "title": .string("Rust port")])) ,
+                    SessionSummary(.object(["sessionId": .string("s2"), "title": .string("Docs polish")]))]
+                filterStore.search = "RUST"
+                if filterStore.visibleSessions.map(\.id) == ["s1"] {
+                    print("PASS session search filters case-insensitively")
+                } else { failures += 1; print("FAIL session search surfaced \(filterStore.visibleSessions.map(\.id))") }
+                filterStore.search = ""
+            }
+            // Fork requires a loaded session: pre-connect it cannot be admitted.
+            if !store.canForkSession { print("PASS fork is not admitted before a loaded session") }
+            else { failures += 1; print("FAIL fork admitted before any session loaded") }
             // SessionSummary: an empty title always reads "New session".
             do {
                 let titled = SessionSummary(.object(["sessionId": .string("s1"), "title": .string("Real title")]))
