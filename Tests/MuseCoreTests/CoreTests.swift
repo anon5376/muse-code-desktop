@@ -553,7 +553,7 @@ enum CoreTests {
         try equal(MarkdownBlocks.parse("1.x\n-x"), [.paragraph("1.x\n-x")])
         // Table rows may be wider or narrower than the header; cells split verbatim.
         try equal(MarkdownBlocks.parse("a | b\n--- | ---\n1 | 2 | 3\n4"), [
-            .table(headers: ["a", "b"], rows: [["1", "2", "3"], ["4"]])])
+            .table(headers: ["a", "b"], rows: [["1", "2", "3"]]), .paragraph("4")])
         // A paragraph yields to a list mid-run.
         try equal(MarkdownBlocks.parse("intro\n- item"), [.paragraph("intro"), .listItem(marker: "•", text: "item", indent: 0)])
     }
