@@ -10,7 +10,10 @@ Documentation and test hardening only — no product behavior changed.
   cross-links PRODUCT.md and the machine-readable design.json; superpowers
   working notes marked as preserved context; onboarding links the deeper
   docs; review-shots pointer corrected; Package.swift notes the
-  script-compiled suite
+  script-compiled suite; protocol doc gains the request-receipt
+  and `userInput/answer` payload contracts; fixtures.md lists every
+  ModelHost input trigger incl. the pending-request, stream, lifecycle,
+  and gap beats
 - Tests: frame-limit edges, history decode rejections, markdown edges,
   streaming partials, JSONValue accessor bounds, status labels, command-id
   format, transcript upsert lifecycle, file-scan exclusions, stale-revision
@@ -18,7 +21,10 @@ Documentation and test hardening only — no product behavior changed.
   round-trip, connection-failure copy, Markdown tables, unadvertised
   reasoning-effort rejection, unconnected admission, empty skill catalog,
   transcript restore reset, sorted prettyPrinted keys, session search
-  filtering, fork/draft admission guards, send-admission content
+  filtering, fork/draft admission guards, send-admission content, pending-request docking + ordering,
+  streamed-turn fold through the store, lifecycle notifications, view
+  gaps, session-history decode contract, frame size cap, echo-diagnostic
+  config, executable discovery
 - Repo: SECURITY.md, issue templates + chooser, CODEOWNERS, PR template,
   .editorconfig, .gitattributes, CONTRIBUTING/PRODUCT/README updates
 - CI: manual `workflow_dispatch` on build and release, cancel-in-progress
