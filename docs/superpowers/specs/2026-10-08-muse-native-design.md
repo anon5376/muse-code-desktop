@@ -1,5 +1,8 @@
 # Muse Code native desktop design
 
+> *Preserved working notes — the living contract is [direction-contract.md](../direction-contract.md), [PRODUCT.md](../../PRODUCT.md) and [DESIGN.md](../../DESIGN.md).*
+
+
 The requested outcome is a Swift macOS application that continues running the installed Muse CLI, with a better native interface and a lean local architecture. The user delegated the remaining decisions. The focused-workspace scope is a stated working assumption; an optional scope question was presented before implementation.
 
 ## Integration decision

@@ -1,5 +1,8 @@
 # Muse Code Native Implementation Plan
 
+> *Preserved working notes — the living contract is [direction-contract.md](../direction-contract.md), [PRODUCT.md](../../PRODUCT.md) and [DESIGN.md](../../DESIGN.md).*
+
+
 > **For agentic workers:** Execute natively in this session with focused behavioral tests and one independent final review.
 
 **Goal:** Build and run a native Swift macOS shell around the installed Muse Code CLI.
