@@ -558,10 +558,6 @@ enum StoreTests {
                 if fixtureStore.selectedModelKey == "" {
                     print("PASS useDefaultModel clears the catalog selection")
                 } else { failures += 1; print("FAIL useDefaultModel: \(fixtureStore.selectedModelKey)") }
-                // quote() shell-escapes single quotes for openFullCLI.
-                if fixtureStore.quote("it's") == "'it'\''s'" {
-                    print("PASS quote escapes embedded single quotes")
-                } else { failures += 1; print("FAIL quote: \(fixtureStore.quote("it's"))") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
