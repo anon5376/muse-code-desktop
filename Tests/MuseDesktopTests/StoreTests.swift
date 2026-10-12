@@ -292,7 +292,7 @@ enum StoreTests {
                     print("PASS empty skill catalog reports empty, not an error")
                 } else { failures += 1; print("FAIL empty skill list raised \(fixtureStore.skillsError ?? "no error") ") }
                 let restoredFirst = fixtureStore.reasoningEffort == "high"
-                if let secondID { fixtureStore.selectSession(secondID); await fixtureStore.refreshModels() }
+                if let secondID { fixtureStore.selectSession(draftSessionID); await fixtureStore.refreshModels() }
                 if firstID != secondID, restoredFirst, fixtureStore.reasoningEffort == nil {
                     print("PASS each session retains only its own supported reasoning choice")
                 } else { failures += 1; print("FAIL reasoning choices leaked between sessions") }
@@ -304,7 +304,7 @@ enum StoreTests {
                     // host posts it asynchronously and a fixed 350 ms raced it in CI.
                     try await waitUntil { second.errorMessage != nil }
                     let backgroundRetained = second.errorMessage == "Synthetic delayed failure" && fixtureStore.errorMessage == nil
-                    fixtureStore.selectSession(secondID)
+                    fixtureStore.selectSession(draftSessionID)
                     if backgroundRetained, fixtureStore.errorMessage == "Synthetic delayed failure" {
                         print("PASS background turn failures stay with their session and reappear on selection")
                     } else { failures += 1; print("FAIL session navigation lost or misrouted a terminal failure") }
@@ -563,15 +563,15 @@ enum StoreTests {
                 fixtureStore.draft = "second session input"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
                 try await waitUntil { fixtureStore.selectedID != nil && fixtureStore.selectedID != "fork-1" && fixtureStore.current?.loaded == true }
-                let secondID = fixtureStore.selectedID!
+                let draftSessionID = fixtureStore.selectedID!
                 fixtureStore.draft = "unsent draft on second"
                 fixtureStore.selectSession("fork-1")
                 try await waitUntil { !fixtureStore.isBusy && fixtureStore.selectedID == "fork-1" && fixtureStore.current?.loaded == true }
                 if fixtureStore.draft != "unsent draft on second" {
                     print("PASS selecting away stashes the draft")
                 } else { failures += 1; print("FAIL stash on select") }
-                fixtureStore.selectSession(secondID)
-                try await waitUntil { !fixtureStore.isBusy && fixtureStore.selectedID == secondID && fixtureStore.current?.loaded == true }
+                fixtureStore.selectSession(draftSessionID)
+                try await waitUntil { !fixtureStore.isBusy && fixtureStore.selectedID == draftSessionID && fixtureStore.current?.loaded == true }
                 if fixtureStore.draft == "unsent draft on second" {
                     print("PASS re-selecting restores the stashed draft")
                 } else { failures += 1; print("FAIL draft restore: \(fixtureStore.draft)") }
