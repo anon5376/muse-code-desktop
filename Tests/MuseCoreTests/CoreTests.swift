@@ -31,6 +31,7 @@ enum CoreTests {
             ("transcript ignores deltas for unknown or inactive items", testTranscriptDeltaEdges),
             ("transcript folds started/updated/completed into one item", testTranscriptUpsertLifecycle),
             ("transcript ignores revisions that do not advance", testTranscriptRejectsStaleRevisions),
+            ("approval falls back to tool/socket/process subjects", testApprovalFallbackKinds),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -320,6 +321,21 @@ enum CoreTests {
         try equal(UserInputAnswer.make(question: single, selections: ["A", "invented"], freeText: ""), nil)
         // Missing or empty question id cannot be answered.
         try equal(UserInputAnswer.make(question: .object(["selection": single["selection"], "options": single["options"]]), selections: ["A"], freeText: ""), nil)
+    }
+
+    static func testApprovalFallbackKinds() throws {
+        // Tool requests read subject.toolName, then the request-level fallback.
+        try equal(ApprovalDescription.summary(.object(["subject": .object([
+            "kind": .string("tool"), "toolName": .string("shell.exec")])])), "shell.exec")
+        try equal(ApprovalDescription.summary(.object(["toolName": .string("request.level"),
+            "subject": .object(["kind": .string("tool")])])), "request.level")
+        try equal(ApprovalDescription.summary(.object(["subject": .object([
+            "kind": .string("unixSocket"), "path": .string("/run/daemon.sock")])])), "unixSocket: /run/daemon.sock")
+        try equal(ApprovalDescription.summary(.object(["subject": .object([
+            "kind": .string("process"), "target": .string("/usr/bin/tar")])])), "process: /usr/bin/tar")
+        // A network subject with no port must not render a dangling colon.
+        try equal(ApprovalDescription.summary(.object(["subject": .object([
+            "kind": .string("network"), "host": .string("plain.test"), "protocol": .string("https")])])), "https://plain.test")
     }
 
     static func testApprovalSubjectDisclosure() throws {
