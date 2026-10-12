@@ -82,6 +82,12 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
             event("userInput/requested", ["sessionId": target, "userInputId": "q-1",
                 "question": ["id": "q", "selection": ["mode": "single"], "options": [["label": "A"], ["label": "B"]]]])
         }
+        if (input.first?["text"] as? String) == "background start" {
+            event("turn/started", ["sessionId": "extra-r", "turnId": "bg-1"])
+        }
+        if (input.first?["text"] as? String) == "background stop" {
+            event("turn/completed", ["sessionId": "extra-r", "turnId": "bg-1", "terminal": "completed"])
+        }
         if (input.first?["text"] as? String) == "isolation demo" {
             event("item/updated", ["sessionId": "extra-r", "item": ["itemId": "iso-1", "kind": "agentMessage", "status": "completed", "revision": 1, "text": "belongs to extra-r"]])
             event("approval/requested", ["sessionId": "extra-r", "approvalId": "appr-iso",
