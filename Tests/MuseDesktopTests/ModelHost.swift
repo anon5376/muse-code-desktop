@@ -62,6 +62,9 @@ while let line = readLine(), let bytes = line.data(using: .utf8),
     case "turn/interrupt":
         result = ["status": "accepted"]
         event("turn/completed", ["sessionId": params["sessionId"] ?? sessionID, "turnId": params["turnId"] ?? "", "terminal": "interrupted"])
+    case "fail/action":
+        writeFrame(["jsonrpc": "2.0", "id": id, "error": ["code": -32601, "message": "Synthetic action failure"]])
+        continue
     case "noop/action":
         result = ["status": "noop", "reason": "already done"]
     case "session/setModel":

@@ -507,6 +507,14 @@ enum StoreTests {
                 if fixtureStore.actionNotice == "Probe: already done." {
                     print("PASS noop actions surface their reason")
                 } else { failures += 1; print("FAIL notice: \(fixtureStore.actionNotice ?? "nil")") }
+                // sessionAction error path: a rejected method lands actionError
+                // and frees the pendingAction key for a retry.
+                fixtureStore.sessionAction("fail/action", label: "Fail")
+                try await waitUntil { fixtureStore.actionError != nil }
+                if fixtureStore.actionNotice == nil, fixtureStore.pendingActions.isEmpty {
+                    print("PASS action failures surface the error and release the key")
+                } else { failures += 1; print("FAIL action error: \(fixtureStore.actionError ?? "nil") pending \(fixtureStore.pendingActions.count)") }
+                fixtureStore.actionError = nil
                 fixtureStore.actionNotice = nil
                 // Files inspector: scan -> preview -> mention all land on the store.
                 let probe = root.appendingPathComponent("probe-file.txt")
