@@ -404,6 +404,15 @@ enum StoreTests {
                 if fixtureStore.sessions.first(where: { $0.id == "extra-r" })?.title == "Renamed" {
                     print("PASS nameChanged updates the session row")
                 } else { failures += 1; print("FAIL rename: \(fixtureStore.sessions.filter { $0.id == "extra-r" })") }
+                // upsert guards: foreign-workspace sessions are dropped and a
+                // blank "New session" title never clobbers a stored one.
+                fixtureStore.newSession(); fixtureStore.draft = "session list hygiene"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.sessions.contains(where: { $0.id == "extra-s" }) }
+                if !fixtureStore.sessions.contains(where: { $0.id == "other-ws" }),
+                   fixtureStore.sessions.first(where: { $0.id == "extra-s" })?.title == "Extra" {
+                    print("PASS upsert guards keep the session list honest")
+                } else { failures += 1; print("FAIL upsert: \(fixtureStore.sessions.map(\.id))") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
