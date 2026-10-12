@@ -29,6 +29,9 @@ Workspace-store fixture used by `scripts/test-workspace.sh`:
   `turn/started`, then `turn/completed` ~200 ms later; any input containing
   `explicit model` is rejected unless `reasoningEffort: "high"` accompanies
   it
+- no `session/resume` handler: `session/start`-created sessions report
+  `loaded`, so `selectSession` takes the early (no-resume) path. Exercising
+  the resume path needs a fixture that answers `session/resume`
 
 ## Adding a beat
 
