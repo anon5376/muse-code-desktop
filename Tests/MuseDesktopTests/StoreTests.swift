@@ -355,6 +355,21 @@ enum StoreTests {
                 if fixtureStore.current?.unavailable == true, fixtureStore.errorMessage != nil {
                     print("PASS view gap marks the session unavailable")
                 } else { failures += 1; print("FAIL gap: \(fixtureStore.current?.unavailable ?? false)") }
+                // approval/updated merges into the stored request; session/started upserts the list.
+                fixtureStore.newSession(); fixtureStore.draft = "notification tail"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.pendingRequests.count == 1 }
+                if fixtureStore.pendingRequests.first?.request["note"].string == "v2",
+                   fixtureStore.sessions.contains(where: { $0.id == "extra-s" && $0.title == "Extra" }) {
+                    print("PASS approval updates merge and session upserts land")
+                } else { failures += 1; print("FAIL tail: \(fixtureStore.pendingRequests.map(\.id)) \(fixtureStore.sessions.map(\.id))") }
+                // statusChanged notLoaded invalidates the loaded session.
+                fixtureStore.newSession(); fixtureStore.draft = "notload demo"
+                fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
+                try await waitUntil { fixtureStore.current?.loaded == false }
+                if fixtureStore.current?.unavailable == true, fixtureStore.pendingRequests.isEmpty {
+                    print("PASS notLoaded invalidates the session")
+                } else { failures += 1; print("FAIL notload: \(fixtureStore.current?.loaded ?? true)") }
                 fixtureStore.newSession(); fixtureStore.draft = "reject once then retry"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy }
                 guard fixtureStore.errorMessage != nil, fixtureStore.draft == "reject once then retry", fixtureStore.selectedID != nil else {
