@@ -414,7 +414,6 @@ enum StoreTests {
                     print("PASS upsert guards keep the session list honest")
                 } else { failures += 1; print("FAIL upsert: \(fixtureStore.sessions.map(\.id))") }
                 // Events keyed to another session stay in that session's state.
-                let liveID = fixtureStore.selectedID
                 fixtureStore.newSession(); fixtureStore.draft = "isolation demo"
                 fixtureStore.send(); try await waitUntil { !fixtureStore.isBusy && !fixtureStore.isRunning }
                 try await waitUntil { fixtureStore.states["extra-r"]?.approvals["appr-iso"] != nil }
