@@ -30,6 +30,7 @@ enum CoreTests {
             ("unavailable resume history cannot become a healthy empty transcript", testUnavailableHistory),
             ("transcript ignores deltas for unknown or inactive items", testTranscriptDeltaEdges),
             ("transcript folds started/updated/completed into one item", testTranscriptUpsertLifecycle),
+            ("transcript ignores revisions that do not advance", testTranscriptRejectsStaleRevisions),
             ("history decoding rejects wrong versions and missing payloads", testHistoryDecodeEdges),
             ("Markdown renders structural blocks and preserves code fences", testMarkdownBlocks),
             ("streaming Markdown keeps completed blocks stable", testStreamingMarkdown),
@@ -217,6 +218,25 @@ enum CoreTests {
 
     // Deltas target live items only: an unstarted itemId, a completed item,
     // and unknown fields/methods are ignored — never resurrected or appended.
+    static func testTranscriptRejectsStaleRevisions() throws {
+        var transcript = Transcript()
+        func item(_ rev: Int, _ text: String) -> JSONValue {
+            .object(["itemId": .string("it"), "kind": .string("agentMessage"),
+                "status": .string("inProgress"), "revision": .number(Double(rev)), "text": .string(text)])
+        }
+        func note(_ item: JSONValue) -> JSONValue {
+            .object(["method": .string("item/updated"), "params": .object(["item": item])])
+        }
+        try equal(transcript.apply(note(item(3, "newest"))), true)
+        // Same revision and an older revision are both ignored — ordering
+        // on the wire is not trusted, revision is.
+        try equal(transcript.apply(note(item(3, "same rev"))), false)
+        try equal(transcript.apply(note(item(1, "rewind"))), false)
+        try equal(transcript.items[0].raw["text"].string, "newest")
+        try equal(transcript.apply(note(item(4, "newer"))), true)
+        try equal(transcript.items[0].raw["text"].string, "newer")
+    }
+
     static func testTranscriptUpsertLifecycle() throws {
         var transcript = Transcript()
         func item(_ status: String, _ revision: Int, _ text: String) -> JSONValue {
